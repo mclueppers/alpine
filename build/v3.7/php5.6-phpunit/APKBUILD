@@ -1,0 +1,38 @@
+# Maintainer: Martin Dobrev <martin@dobrev.it>
+
+pkgver=5.7.27
+pkgrel=0
+_phpver=5.6
+_php=php$_phpver
+pkgname=$_php-phpunit
+pkgdesc="PHPUnit package with PHP $_phpver dependencies"
+url="https://phpunit.de/"
+arch="noarch"
+license="BSD 3 Clause"
+depends="$_php $_php-phar $_php-json $_php-mbstring $_php-openssl $_php-dom $_php-xml"
+makedepends="wget $_php $_php-phar $_php-json $_php-mbstring $_php-openssl $_php-dom $_php-xml"
+provides="phpunit phpunit$_phpver"
+install_if="$_php $_php-common"
+builddir="$srcdir/$pkgname-$pkgver"
+
+
+prepare() {
+  default_prepare
+  mkdir -p "$builddir"
+}
+
+build() {
+  # Meta package
+  cd "$builddir"
+  wget -O phpunit https://phar.phpunit.de/phpunit-5.phar
+  chmod +x phpunit
+}
+
+check () {
+	cd "$builddir"
+	./phpunit --version
+}
+package() {
+  mkdir -p "$pkgdir/usr/bin/"
+  sudo cp "$builddir/phpunit" "$pkgdir/usr/bin/"
+}

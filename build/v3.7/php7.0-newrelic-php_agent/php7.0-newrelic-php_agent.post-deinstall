@@ -1,0 +1,3 @@
+#!/bin/sh
+
+unlink /usr/lib/php/7.0/modules/newrelic.so

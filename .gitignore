@@ -1,0 +1,10 @@
+/public/*
+!/public
+/public/dobrevit.rsa.pub
+/build/dobrevit.rsa.priv
+/build/*/*/pkg
+/build/*/*/src
+/build/*/*/tmp
+/.docker/abuild/home/packager/.abuild/dobrevit.rsa.priv
+/log/*
+!/log/.gitkeep

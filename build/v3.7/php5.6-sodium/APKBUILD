@@ -1,8 +1,8 @@
-# Maintainer: Peter Kokot <peterkokot@gmail.com>
+# Maintainer: Martin Dobrev <martin@dobrev.it>
 
-pkgver=2.0.11
+pkgver=1.0.6
 pkgrel=0
-_phpver=7.0
+_phpver=5.6
 _php=php$_phpver
 _pkgreal=sodium
 pkgname=$_php-$_pkgreal
@@ -56,4 +56,4 @@ package() {
   install -d "$pkgdir"/etc/php/$_phpver/conf.d
   echo "extension=$_pkgreal.so" > "$pkgdir"/etc/php/$_phpver/conf.d/$_pkgreal.ini
 }
-sha512sums="ce617f8820ebec23c8544d820a3fad944d7ad77afcf8ad96dc0013d8efc92618c9006ec7af58f1ded5c11bbbbdaa4246fb5d84082d2deddca85c8f41f7f98219  libsodium-2.0.11.tgz"
+sha512sums="ef0039a97f6e87eef368d2fb6b4d1824e54c37f30a159a1a77d2360f3f54aa208e76efc7708f89ed4cbfef0731ce1a3079f14adb58ca8f5321b455c5c88e75da  libsodium-1.0.6.tgz"

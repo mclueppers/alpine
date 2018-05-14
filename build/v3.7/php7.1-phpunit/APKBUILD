@@ -1,6 +1,6 @@
 # Maintainer: Peter Kokot <peterkokot@gmail.com>
 
-pkgver=1.0.0
+pkgver=7.1.5
 pkgrel=0
 _phpver=7.1
 _php=php$_phpver
@@ -9,16 +9,30 @@ pkgdesc="PHPUnit meta package with PHP $_phpver dependencies"
 url="https://phpunit.de/"
 arch="noarch"
 license="BSD 3 Clause"
-depends="phpunit $_php $_php-phar $_php-json $_php-mbstring $_php-openssl $_php-dom $_php-xml"
-makedepends=""
-options="!check"
-install_if="phpunit $_php-common"
+depends="$_php $_php-phar $_php-json $_php-mbstring $_php-openssl $_php-dom $_php-xml"
+makedepends="$_php $_php-phar $_php-json $_php-mbstring $_php-openssl $_php-dom $_php-xml"
+install="$_php-phpunit.post-install"
+install_if="$_php $_php-phar $_php-common"
+
+
+prepare() {
+  default_prepare
+  mkdir -p "$builddir"
+}
 
 build() {
   # Meta package
-  return 0
+  cd "$builddir"
+  wget -O phpunit$_phpver https://phar.phpunit.de/phpunit-7.phar
+  chmod +x phpunit$_phpver
+}
+
+check () {
+	cd "$builddir"
+	./phpunit$_phpver --version
 }
 
 package() {
-  mkdir -p "$pkgdir"
+  mkdir -p "$pkgdir/usr/sbin/"
+  sudo cp "$builddir/phpunit$_phpver" "$pkgdir/usr/sbin/"
 }

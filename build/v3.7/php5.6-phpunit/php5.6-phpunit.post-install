@@ -1,0 +1,9 @@
+#!/bin/sh
+
+_suffix="5.6"
+
+link=$(readlink /usr/sbin/phpunit)
+
+if [[ "$link" != "/usr/sbin/phpunit$_suffix" || ! -f "$link" ]]; then
+  ln -sf /usr/sbin/phpunit$_suffix /usr/sbin/phpunit
+fi

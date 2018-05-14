@@ -20,9 +20,11 @@ php5.6-apcu
 php5.6-composer
 php5.6-imagick
 php5.6-memcached
+php5.6-memcached-elasticache
 php5.6-meminfo
 php5.6-mongodb
 php5.6-newrelic-php_agent
+php5.6-phpunit
 php5.6-pickle
 php5.6-redis
 php5.6-sodium
@@ -98,8 +100,12 @@ elif [ "$BUILD_PACKAGES" = "7.1" ]; then
   packages=$packages_71
 elif [ "$BUILD_PACKAGES" = "7.2" ]; then
   packages=$packages_72
+elif [ "$BUILD_PACKAGES" = "other" ]; then
+  packages=$packages_others
+elif [ "$BUILD_PACKAGES" = "php_all" ]; then
+  packages="php5.6 $packages_56 php7.0 $packages_70 php7.1 $packages_71 php7.2 $packages_72"
 elif [ "$BUILD_PACKAGES" = "all" ]; then
-  packages="$packages_others $packages_56 $packages_70 $packages_71 $packages_72"
+  packages="$packages_56 $packages_70 $packages_71 $packages_72"
 else
   packages="$BUILD_PACKAGES"
 fi
@@ -110,6 +116,7 @@ for package in $packages; do
 
   abuild checksum
   abuild -r -K
+  abuild undeps
 
   # Generate index with trusted signature
   generate-index v3.7

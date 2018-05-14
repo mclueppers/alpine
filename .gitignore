@@ -1,6 +1,7 @@
 /public/*
 !/public
 /public/dobrevit.rsa.pub
+/build/v3.7/*-behat/
 /build/dobrevit.rsa.priv
 /build/*/*/pkg
 /build/*/*/src

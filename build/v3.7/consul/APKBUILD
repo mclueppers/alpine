@@ -1,0 +1,19 @@
+# Maintainer: Martin Dobrev <martin@dobrev.it>
+
+pkgver=1.1.0
+pkgrel=0
+pkgname=consul
+pkgdesc="Service Discovery and Configuration Made Easy"
+url="https://www.consul.io/"
+arch="x86_64"
+license="Mozilla Public License 2.0"
+depends=""
+makedepends="zip"
+source="$pkgname-$pkgver.zip::https://releases.hashicorp.com/$pkgname/$pkgver/${pkgname}_${pkgver}_linux_amd64.zip"
+options="!check"
+
+package() {
+  install -m 0755 -D "$srcdir"/$pkgname "$pkgdir"/usr/bin/$pkgname
+}
+
+sha512sums="9d256798e4d9c26c8d75073930b719a1328fa7a7ae1beb5706a697cbca53d2b54b200f581a26b3d7d2c328914d083a90474a463814e96407e9fb25d88e573340  consul-1.1.0.zip"

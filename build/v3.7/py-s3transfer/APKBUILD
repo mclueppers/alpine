@@ -1,0 +1,52 @@
+# Maintainer: Valery Kartel <valery.kartel@gmail.com>
+# Contributor: Valery Kartel <valery.kartel@gmail.com>
+pkgname=py-s3transfer
+_pkgname=${pkgname#py-}
+pkgver=0.1.12
+pkgrel=0
+pkgdesc="Amazon S3 Transfer Manager for Python"
+url="https://github.com/boto/s3transfer"
+arch="noarch"
+license="Apache-2.0"
+makedepends="python2-dev python3-dev py-setuptools"
+subpackages="py3-$_pkgname:_py3 py2-$_pkgname:_py2"
+source="$_pkgname-$pkgver.tar.gz::https://github.com/boto/$_pkgname/archive/$pkgver.tar.gz"
+builddir="$srcdir/$_pkgname-$pkgver"
+
+build() {
+	cd "$builddir"
+	python2 setup.py build
+	python3 setup.py build
+}
+
+check() {
+	cd "$builddir"
+	python2 setup.py check
+	python3 setup.py check
+}
+
+package() {
+	mkdir -p "$pkgdir"
+}
+
+_py2() {
+	replaces="$pkgname"
+	depends="${depends//py-/py2-}"
+	_py python2
+}
+
+_py3() {
+	depends="${depends//py-/py3-}"
+	_py python3
+}
+
+_py() {
+	local python="$1"
+	pkgdesc="$pkgdesc (for $python)"
+	depends="$depends $python"
+	install_if="$pkgname=$pkgver-r$pkgrel $python"
+
+	cd "$builddir"
+	$python setup.py install --prefix=/usr --root="$subpkgdir"
+}
+sha512sums="3f692775cb5c5264087e3d255813ed787bd76661ebb1a3883e6c01f36098571a22deb601e5d975412ea303b911353f98c687a5ab0d385c969cdf6b166b5497af  s3transfer-0.1.12.tar.gz"

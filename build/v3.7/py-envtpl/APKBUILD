@@ -1,0 +1,47 @@
+# Maintainer: Dobrev IT Ltd. <support@dobrev.it>
+pkgname=py-envtpl
+pkgver=0.6.0
+pkgrel=0
+_pkgreal=${pkgname#py-}
+pkgdesc="Render jinja2 templates on the command line with shell environment variables"
+url="https://github.com/andreasjansson/envtpl"
+arch="noarch"
+license="MIT"
+options="!check"
+makedepends="python2-dev python3-dev py-setuptools"
+subpackages="py3-$_pkgreal:_py3 py2-$_pkgreal:_py2"
+source="https://files.pythonhosted.org/packages/source/${_pkgreal:0:1}/$_pkgreal/$_pkgreal-$pkgver.tar.gz"
+builddir="$srcdir/$_pkgreal-$pkgver"
+options="!check"
+
+build() {
+	cd "$builddir"
+	python2 setup.py build || return 1
+	python3 setup.py build || return 1
+}
+
+package() {
+	mkdir -p "$pkgdir"
+}
+
+_py2() {
+	replaces="$pkgname"
+	depends="${depends//py-/py2-}"
+	_py python2
+}
+
+_py3() {
+	depends="${depends//py-/py3-}"
+	_py python3
+}
+
+_py() {
+	local python="$1"
+	pkgdesc="$pkgdesc (for $python)"
+	depends="$depends $python"
+	install_if="$pkgname=$pkgver-r$pkgrel $python"
+
+	cd "$builddir"
+	$python setup.py install --prefix=/usr --root="$subpkgdir"
+}
+sha512sums="4fcff88781e77fc971488b584962e2b1883df572739e3aa20131c3ed0034008fde627bf2080523f84a46f8f90fa8a66cf2f8789be50f6e9926be042e57db29ee  envtpl-0.6.0.tar.gz"

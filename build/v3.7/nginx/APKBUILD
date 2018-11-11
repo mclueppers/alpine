@@ -8,10 +8,10 @@
 #     - CVE-2017-7529
 #
 pkgname=nginx
-pkgver=1.15.0
+pkgver=1.15.6
 pkgrel=100
 # Revision of nginx-tests to use for check().
-_tests_hgrev=106d9f806288
+_tests_hgrev=ad3cb6f451a5
 pkgdesc="HTTP and reverse proxy server (stable version)"
 url="http://www.nginx.org/en"
 arch="all"

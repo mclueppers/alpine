@@ -3,7 +3,8 @@
 # Script for building and packaging
 # Usage package [5.6|7.0|7.1|7.2|all|{package-name}]
 
-BUILD_PACKAGES="${1:-all}"
+ALPINE_VERSION="${1:-v3.7}"
+BUILD_PACKAGES="${2:-all}"
 
 packages_others="
 argon2
@@ -88,8 +89,8 @@ php7.2-yaml
 
 # To build PHP Pecl extensions and some packages, we'll need some deps from the
 # local PHP.earth Alpine repository
-mkdir -p /public/v3.7/x86_64
-abuild-sign -k /build/dobrevit.rsa.priv /public/v3.7/x86_64/APKINDEX.tar.gz
+mkdir -p /public/${ALPINE_VERSION}/x86_64
+abuild-sign -k /build/dobrevit.rsa.priv /public/${ALPINE_VERSION}/x86_64/APKINDEX.tar.gz
 sudo apk update
 
 if [ "$BUILD_PACKAGES" = "5.6" ]; then
@@ -111,7 +112,7 @@ else
 fi
 
 for package in $packages; do
-  cd /build/v3.7/$package
+  cd /build/${ALPINE_VERSION}/$package
   rm -rf src pkg tmp
 
   abuild checksum
@@ -119,5 +120,5 @@ for package in $packages; do
   abuild undeps
 
   # Generate index with trusted signature
-  generate-index v3.7
+  generate-index ${ALPINE_VERSION}
 done

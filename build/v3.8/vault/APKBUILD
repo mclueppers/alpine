@@ -1,0 +1,35 @@
+# Maintainer: Martin Dobrev <martin@dobrev.it>
+
+pkgver=0.11.4
+pkgrel=0
+pkgname=vault
+pkgdesc="A Tool for Managing Secrets"
+url="https://www.vaultproject.io/"
+arch="x86_64"
+license="Mozilla Public License 2.0"
+depends=""
+makedepends="zip"
+source="$pkgname-$pkgver.zip::https://releases.hashicorp.com/$pkgname/$pkgver/${pkgname}_${pkgver}_linux_amd64.zip
+$pkgname.bash-completion::https://raw.githubusercontent.com/Bash-it/bash-it/master/completion/available/${pkgname}.completion.bash"
+subpackages="$pkgname-bash-completion:bashcomp"
+options="!check"
+
+package() {
+  install -m 0755 -D "$srcdir"/$pkgname "$pkgdir"/usr/bin/$pkgname
+}
+
+bashcomp() {
+	pkgdesc="$pkgname (bash completions)"
+	depends="$pkgname=$pkgver-r$pkgrel bash-completion"
+	url="https://github.com/Bash-it/bash-it/blob/master/completion/available/"
+	license="GNU General Public License 2.0"
+	arch="noarch"
+	install_if="$pkgname=$pkgver-r$pkgrel bash-completion"
+
+	mkdir -p "$subpkgdir"/usr/share/bash-completion/completions
+	install -m 0644 -D "$srcdir"/$pkgname.bash-completion "$subpkgdir"/usr/share/bash-completion/completions
+	mv "$subpkgdir"/usr/share/bash-completion/completions/$pkgname.bash-completion "$subpkgdir"/usr/share/bash-completion/completions/$pkgname
+}
+
+sha512sums="2188bc00aef74bc2ff16496e418b13d5646b7186bd3e5d793f5b2a9aedeb2b5858fe5726f986f35022ce2d077e673f8a2ae5be3837a3ff1125e421bdb3e0cdc8  vault-0.11.4.zip
+8bf604a920df3d42251d93e1289b9bb69103d1fb5adde396236e670d64483ecf5397675ed4d457c4b7d9fbcdfbf46821716d777d59577807cdaf47860384e5af  vault.bash-completion"

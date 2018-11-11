@@ -1,0 +1,54 @@
+# Maintainer: Martin Dobrev <martin@dobrev.eu>
+
+# Customized latest version from Git master branch
+pkgver=3.4.3
+pkgrel=0
+_phpver=7.2
+_php=php$_phpver
+_pkgname=behat
+_symfony_ver='4.0.6'
+pkgname=$_php-behat
+pkgdesc="The PHP extension installer"
+url="https://github.com/Behat/Behat/"
+arch="noarch"
+license="BSD 3 Clause"
+depends="$_php $_php-phar $_php-composer $_php-json $_php-mbstring $_php-openssl $_php-dom $_php-xml $_php-simplexml $_php-session $_php-tokenizer $_php-xmlwriter $_php-zip"
+source="$pkgname-$pkgver.tar.gz::https://github.com/Behat/Behat/archive/v$pkgver.tar.gz
+$pkgname.box.json.dist"
+makedepends="$_php $_php-phar $_php-composer $_php-json $_php-mbstring $_php-openssl $_php-dom $_php-xml $_php-simplexml $_php-session $_php-tokenizer $_php-xmlwriter $_php-zip git"
+builddir="$srcdir/Behat-$pkgver"
+
+prepare () {
+  default_prepare
+  cp $srcdir/$_php-$_pkgname.box.json.dist $builddir/box.json.dist 
+}
+
+build() {
+  cd "$builddir"
+  curl -LSs https://box-project.github.io/box2/installer.php | php
+  export SYMFONY_VERSION="$_symfony_ver"
+
+  if [ "$SYMFONY_VERSION" != "" ]; then
+    composer require --no-update "symfony/symfony:${SYMFONY_VERSION}"
+  fi
+
+  export PATH=.:./bin:$PATH
+  
+  rm -Rf ./vendor
+  
+  composer update --no-dev --optimize-autoloader
+  php -d phar.readonly=0 box.phar build
+}
+
+check() {
+  cd "$builddir"
+  phpunit
+  php $_pkgname.phar --version
+}
+
+package() {
+  install -m 0755 -D "$builddir"/$_pkgname.phar "$pkgdir"/usr/bin/$_pkgname$pkgver
+}
+
+sha512sums="c952ce2e424cc127bbbce4099308ea26dc1627f5c0824d42529e818f55e186d53e9c9c8efc464cc097aa95f5de920efefe63c8be12bc6050a64e6970423d26d0  php7.2-behat-3.4.3.tar.gz
+bf85ea4f5b84cda563ebf0af0999cfe893d9ca77e52a7d5c3ed096f56376a3ac98a706d6660363cedb502e9a17ba03683e58b8b5171c45847de28d2c9060e273  php7.2-behat.box.json.dist"

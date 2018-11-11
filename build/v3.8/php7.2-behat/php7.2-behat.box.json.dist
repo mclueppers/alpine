@@ -1,0 +1,29 @@
+{
+    "alias": "behat.phar",
+    "chmod": "0755",
+    "compactors": [
+        "Herrera\\Box\\Compactor\\Json",
+        "Herrera\\Box\\Compactor\\Php"
+    ],
+    "directories": ["src", "vendor"],
+    "finder": [
+        {
+            "name": "*.php",
+            "exclude": [
+                "CHANGELOG",
+                "CONTRIBUTING",
+                "README",
+                "Tests",
+                "atoum",
+                "behat",
+                "bin",
+                "hoa",
+                "phpunit"
+            ],
+            "in": "vendor"
+        }
+    ],
+    "main": "bin/behat",
+    "output": "behat.phar",
+    "stub": true
+}

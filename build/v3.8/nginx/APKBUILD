@@ -1,0 +1,288 @@
+# Maintainer: Jakub Jirutka <jakub@jirutka.cz>
+# Contributor: Jeff Bilyk <jbilyk@gmail.com>
+# Contributor: Bartłomiej Piotrowski <nospam@bpiotrowski.pl>
+# Contributor: Jakub Jirutka <jakub@jirutka.cz>
+#
+# secfixes:
+#   1.12.1-r0:
+#     - CVE-2017-7529
+#
+pkgname=nginx
+pkgver=1.15.6
+pkgrel=100
+# Revision of nginx-tests to use for check().
+_tests_hgrev=106d9f806288
+pkgdesc="HTTP and reverse proxy server (stable version)"
+url="http://www.nginx.org/en"
+arch="all"
+license="custom"
+depends=""
+makedepends="linux-headers gd-dev geoip-dev libxml2-dev libxslt-dev
+	libressl-dev paxmark pcre-dev perl-dev pkgconf zlib-dev"
+checkdepends="perl perl-fcgi perl-io-socket-ssl perl-net-ssleay
+	perl-protocol-websocket uwsgi-python"
+pkgusers="nginx"
+_grp_ngx="nginx"
+_grp_www="www-data"
+pkggroups="$_grp_ngx $_grp_www"
+install="$pkgname.pre-install $pkgname.pre-upgrade $pkgname.post-upgrade"
+subpackages="$pkgname-doc $pkgname-vim::noarch"
+replaces="$pkgname-common $pkgname-initscripts $pkgname-lua $pkgname-rtmp"
+source="http://nginx.org/download/$pkgname-$pkgver.tar.gz
+	$pkgname-tests-$_tests_hgrev.tar.gz::http://hg.nginx.org/nginx-tests/archive/$_tests_hgrev.tar.gz
+	nginx.conf
+	default.conf
+	$pkgname.logrotate
+	$pkgname.initd
+	"
+builddir="$srcdir/$pkgname-$pkgver"
+
+_modules_dir="usr/lib/$pkgname/modules"
+
+# luajit is not available for s390x and ppc64le
+case "$CARCH" in
+	ppc64le | s390x) makedepends="$makedepends lua5.1-dev";;
+	*) makedepends="$makedepends luajit-dev";;
+esac
+
+# Built-in dynamic modules
+for _mod in \
+	http-geoip \
+	http-image-filter \
+	http-perl \
+	http-xslt-filter \
+	mail \
+	stream \
+	stream-geoip
+do
+	subpackages="$subpackages $pkgname-mod-$_mod:_module"
+done
+
+# Third-party dynamic modules
+
+# For simplicity we assume that module is hosted on GitHub.
+_add_module() {
+	local name="$1" ver="$2" url="$3"
+	local dirname="${url##*/}-${ver#v}"
+
+	subpackages="$subpackages $pkgname-mod-$name:_module"
+	source="$source $dirname.tar.gz::$url/archive/$ver.tar.gz"
+	_extra_flags="$_extra_flags --add-dynamic-module=$srcdir/$dirname"
+}
+
+_add_module "devel-kit" "v0.3.0" "https://github.com/simpl/ngx_devel_kit"
+_devel_kit_so="ndk_http_module.so"
+
+_add_module "http-cache-purge" "2.4.2" "https://github.com/nginx-modules/ngx_cache_purge"
+
+_add_module "http-echo" "v0.61" "https://github.com/openresty/echo-nginx-module"
+
+_add_module "http-fancyindex" "v0.4.2" "https://github.com/aperezdc/ngx-fancyindex"
+
+_add_module "http-headers-more" "v0.32" "https://github.com/openresty/headers-more-nginx-module"
+_http_headers_more_so="ngx_http_headers_more_filter_module.so"
+
+_add_module "http-lua" "v0.10.10" "https://github.com/openresty/lua-nginx-module"
+_http_lua_depends="$pkgname-mod-devel-kit"
+_http_lua_provides="$pkgname-lua"  # for backward compatibility
+
+_add_module "http-lua-upstream" "v0.07" "https://github.com/openresty/lua-upstream-nginx-module"
+_http_lua_upstream_depends="$pkgname-mod-http-lua"
+
+_add_module "http-nchan" "v1.1.7" "https://github.com/slact/nchan"
+_http_nchan_so="ngx_nchan_module.so"
+
+_add_module "http-shibboleth" "v2.0.1" "https://github.com/nginx-shib/nginx-http-shibboleth"
+
+_add_module "http-redis2" "v0.14" "https://github.com/openresty/redis2-nginx-module"
+
+_add_module "http-set-misc" "v0.31" "https://github.com/openresty/set-misc-nginx-module"
+_http_set_misc_depends="$pkgname-mod-devel-kit"
+
+_add_module "http-upload-progress" "v0.9.2" "https://github.com/masterzen/nginx-upload-progress-module"
+_http_upload_progress_so="ngx_http_uploadprogress_module.so"
+
+_add_module "http-upstream-fair" "0.1.3" "https://github.com/itoffshore/nginx-upstream-fair"
+
+_add_module "rtmp" "v1.2.0" "https://github.com/arut/nginx-rtmp-module"
+_rtmp_provides="$pkgname-rtmp"  # for backward compatibility
+
+
+prepare() {
+	local file; for file in $source; do
+		case $file in
+		*~*.patch)
+			msg $file
+			cd "$srcdir"/${file%%~*}-*
+			patch -p 1 -i "$srcdir/$file"
+			;;
+		*.patch)
+			msg $file
+			cd "$builddir"
+			patch -p 1 -i "$srcdir/$file"
+			;;
+		esac
+	done
+
+	# This test requires superuser privileges and CAP_NET_ADMIN.
+	rm "$srcdir"/nginx-tests-*/proxy_bind_transparent.t
+}
+
+build() {
+	cd "$builddir"
+
+	export LUAJIT_LIB="$(pkgconf --variable=libdir luajit)"
+	export LUAJIT_INC="$(pkgconf --variable=includedir luajit)"
+	./configure \
+		--prefix=/var/lib/$pkgname \
+		--sbin-path=/usr/sbin/$pkgname \
+		--modules-path=/$_modules_dir \
+		--conf-path=/etc/$pkgname/$pkgname.conf \
+		--pid-path=/run/$pkgname/$pkgname.pid \
+		--lock-path=/run/$pkgname/$pkgname.lock \
+		--http-client-body-temp-path=/var/tmp/$pkgname/client_body \
+		--http-proxy-temp-path=/var/tmp/$pkgname/proxy \
+		--http-fastcgi-temp-path=/var/tmp/$pkgname/fastcgi \
+		--http-uwsgi-temp-path=/var/tmp/$pkgname/uwsgi \
+		--http-scgi-temp-path=/var/tmp/$pkgname/scgi \
+		--with-perl_modules_path=/usr/lib/perl5/vendor_perl \
+		\
+		--user=$pkgusers \
+		--group=$_grp_ngx \
+		--with-threads \
+		--with-file-aio \
+		\
+		--with-http_ssl_module \
+		--with-http_v2_module \
+		--with-http_realip_module \
+		--with-http_addition_module \
+		--with-http_xslt_module=dynamic \
+		--with-http_image_filter_module=dynamic \
+		--with-http_geoip_module=dynamic \
+		--with-http_sub_module \
+		--with-http_dav_module \
+		--with-http_flv_module \
+		--with-http_mp4_module \
+		--with-http_gunzip_module \
+		--with-http_gzip_static_module \
+		--with-http_auth_request_module \
+		--with-http_random_index_module \
+		--with-http_secure_link_module \
+		--with-http_degradation_module \
+		--with-http_slice_module \
+		--with-http_stub_status_module \
+		--with-http_perl_module=dynamic \
+		--with-mail=dynamic \
+		--with-mail_ssl_module \
+		--with-stream=dynamic \
+		--with-stream_ssl_module \
+		--with-stream_realip_module \
+		--with-stream_geoip_module=dynamic \
+		--with-stream_ssl_preread_module \
+		\
+		$_extra_flags
+
+	make
+}
+
+check() {
+	cd "$srcdir"/nginx-tests-*
+
+  # Remove failing tests
+	# TODO: find a suitable patch for this test
+	rm -rf proxy_bind_transparent_capability.t
+	TEST_NGINX_BINARY="$builddir/objs/nginx" prove .
+}
+
+package() {
+	cd "$builddir"
+
+	make DESTDIR="$pkgdir" install
+
+	# Disable some PaX protections; this is needed for Lua module.
+	local paxflags="-m"
+	[ "$CARCH" = "x86" ] && paxflags="-msp"
+	paxmark $paxflags "$pkgdir"/usr/sbin/nginx
+
+	install -Dm644 LICENSE "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
+	install -Dm644 README "$pkgdir"/usr/share/doc/$pkgname/README
+
+	install -Dm644 objs/$pkgname.8 "$pkgdir"/usr/share/man/man8/$pkgname.8
+
+	local name; for name in ngx_devel_kit lua-nginx-module nginx-rtmp-module; do
+		cp -r "$srcdir"/$name-*/doc* "$pkgdir"/usr/share/doc/$pkgname/$name
+	done
+
+	cd "$pkgdir"
+
+	install -Dm644 "$srcdir"/nginx.conf ./etc/$pkgname/nginx.conf
+	install -Dm644 "$srcdir"/default.conf ./etc/$pkgname/conf.d/default.conf
+	install -Dm755 "$srcdir"/$pkgname.initd ./etc/init.d/$pkgname
+	install -Dm644 "$srcdir"/$pkgname.logrotate ./etc/logrotate.d/$pkgname
+
+	install -dm755 ./etc/$pkgname/modules
+	install -dm750 -o $pkgusers -g $_grp_ngx ./var/lib/$pkgname
+	install -dm700 -o $pkgusers -g $_grp_ngx ./var/tmp/$pkgname
+	install -dm755 -g $_grp_www ./var/www/localhost/htdocs
+
+	install -dm755 ./var/log
+	mv ./var/lib/$pkgname/logs ./var/log/$pkgname
+
+	ln -sf /$_modules_dir ./var/lib/$pkgname/modules
+	ln -sf /var/log/$pkgname ./var/lib/$pkgname/logs
+	ln -sf /var/tmp/$pkgname ./var/lib/$pkgname/tmp
+	ln -sf /run/$pkgname ./var/lib/$pkgname/run
+
+	# Remove archaic charset maps.
+	rm ./etc/$pkgname/koi-* ./etc/$pkgname/win-utf
+
+	rm -rf ./run ./etc/$pkgname/*.default
+}
+
+vim() {
+	pkgdesc="$pkgdesc (vim syntax)"
+	depends=
+
+	mkdir -p "$subpkgdir"/usr/share/vim
+	cp -r "$builddir"/contrib/vim "$subpkgdir"/usr/share/vim/vimfiles
+}
+
+_module() {
+	local name="${subpkgname#$pkgname-mod-}"
+	name="${name//-/_}"
+	local soname="$(eval "echo \$_${name}_so")";
+	soname="${soname:-"ngx_${name}_module.so"}"
+
+	pkgdesc="$pkgdesc (module $name)"
+	depends="$pkgname $(eval "echo \$_${name}_depends")"
+	provides="$(eval "echo \$_${name}_provides")"
+
+	mkdir -p "$subpkgdir"/$_modules_dir
+	cd "$subpkgdir"
+
+	mv "$pkgdir"/$_modules_dir/$soname ./$_modules_dir/$soname
+
+	mkdir -p "$subpkgdir"/etc/nginx/modules
+	echo "load_module \"modules/$soname\";" > ./etc/nginx/modules/$name.conf
+}
+
+sha512sums="89c1b7df7ed0722a930a977edfb94a8278e51ebd7d5a0d0959ac09515374f976283e945c283b704447f7b57fd302bdbbea0d0d11c48aa282f2d53230eb3e63be  nginx-1.15.6.tar.gz
+7bad86dd818db61a0454f9b74ff420dd16233066a13c9a6bdbedd1c521e7ddb7e46b6587821f9a7504e5c359808299e8fe22720768570832a82409e3f34805c6  nginx-tests-106d9f806288.tar.gz
+ac7e3153ab698b4cde077f0d5d7ac0a58897927eb36cf3b58cb01268ca0296f1d589c0a5b4f889b96b5b4a57bef05b17c59be59a9d7c4d7a3d3be58f101f7f41  nginx.conf
+0907f69dc2d3dc1bad3a04fb6673f741f1a8be964e22b306ef9ae2f8e736e1f5733a8884bfe54f3553fff5132a0e5336716250f54272c3fec2177d6ba16986f3  default.conf
+09b110693e3f4377349ccea3c43cb8199c8579ee351eae34283299be99fdf764b0c1bddd552e13e4d671b194501618b29c822e1ad53b34101a73a63954363dbb  nginx.logrotate
+eb183860cd511361346e4079c1fcf470985e1c3b2a034a57f8b2a92ba851fed99256261f9b779770a5f57e3750e9e71bd1550a9d19ad9bf3a4d288864f0374a2  nginx.initd
+558764c9be913a4f61d0e277d07bf3c272e1ce086b3fadb85b693a7e92805cd9fca4da7a8d29c96e53fc0d23b331327d3b2561ff61f19d2330e7d5d35ac7d614  ngx_devel_kit-0.3.0.tar.gz
+1c2e6f5026becbd7bdf9feb920f10c19c6c5487600008161b045e9d6b5ea0269af68a2869e57b528bc921d549c541e6dbb02eb2ef26416a22d5d5a7f3ffc552b  ngx_cache_purge-2.4.2.tar.gz
+c90b81a4e85a8e9beeb5ff591dc91adb25fa4e0b6cb47086b577e5fa36db2368442dd011187675e358781956c364b949bc4d920ca2b534481b21c9987d2a9a3b  echo-nginx-module-0.61.tar.gz
+aee121e4d25872f0eee6c8150c8c732767ab24c61dc4f6e3f86bd6edc53ad715f3c23045362954a1ad2086ff1002bca821b2e9a53b58b077cbda91a95077ef76  ngx-fancyindex-0.4.2.tar.gz
+e42582b45c3111de3940bbeb67ce161aca2d55adcfb00c61c12256fa0e36221d38723013f36edbcf6d1b520f8dfb49d4657df8a956e66d36e68425afad382bd1  headers-more-nginx-module-0.32.tar.gz
+3440e3fe714407f0ff61e0da207669655b443f7b70ef8a91693ea05ed96d8fde349d9c8ea30d5ff53ea3f8e4a5c7d0a2834e136c340b1b1365d62006339a1e4d  lua-nginx-module-0.10.10.tar.gz
+72887c4490854b099cb26bb3f840073a36b0d812bde4486f04dc1be182ca74f0d1e3fd709e77c240c2dcf37665f74cf04e188ea9efe8e127c6789b27b487d0cd  lua-upstream-nginx-module-0.07.tar.gz
+1e9b029912ef6e89dba8e3aed57d50848b52fbeb1077d965ca39aea14c2b34c11092ee53db47fb1df9e5adaf466f849c5a33cade881fddb420c1a036bc659d4b  nchan-1.1.7.tar.gz
+1730845ea2e52be8c2f6cfceb2894304c5a07959a96940bb1617ee0e7cf81d22283304f411d9a219ddb71e4d9a66012bba0f6f5574d101aeb3c406f26c5d6a4e  nginx-http-shibboleth-2.0.1.tar.gz
+a22cfab85f5a15cf4b778749227caee559982dbe7711e1c5698456b3821943ec66b7a980ed56612b7f2ae70d22832123be24e50a402c659c6f3eb1d98d60b4cd  redis2-nginx-module-0.14.tar.gz
+c853b041cecc3521f888be3d0483c6cf23d239259ac4f5d35b10d4483b0fb06d1d22060adedcf6605b220d99f9051faf300d06989736d510b4486f943d3a675e  set-misc-nginx-module-0.31.tar.gz
+c31c46344d49704389722325a041b9cd170fa290acefe92cfc572c07f711cd3039de78f28df48ca7dcb79b2e4bbe442580aaaf4d92883fd3a14bf41d66dd9d8c  nginx-upload-progress-module-0.9.2.tar.gz
+8adb7453c27748f4e685e3352e9b318b408da818754dc5b6244e908423941a8ba337561104f6e481f2553cbc0e334dcea73b57f8e810a9d6e974bb69ff8859e5  nginx-upstream-fair-0.1.3.tar.gz
+8965d9bee91a46375516ccd012d1c43cd23f15c0630d11ed01472b9a84504574b476f22c5584f43c972a8f923e9ae025b9b60c64aace0ed159c7279bcbd376c8  nginx-rtmp-module-1.2.0.tar.gz"

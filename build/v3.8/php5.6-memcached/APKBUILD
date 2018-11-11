@@ -1,0 +1,58 @@
+# Maintainer: Peter Kokot <peterkokot@gmail.com>
+
+pkgver=2.2.0
+pkgrel=0
+_phpver=5.6
+_php=php$_phpver
+_pkgreal=memcached
+pkgname=$_php-$_pkgreal
+pkgdesc="PHP $_phpver Memcached extension"
+url="http://pecl.php.net/package/$_pkgreal"
+arch="all"
+license="PHP-3"
+depends="$_php-common $_php-session"
+makedepends="$_php-dev coreutils zlib-dev libmemcached-dev cyrus-sasl-dev"
+source="http://pecl.php.net/get/$_pkgreal-$pkgver.tgz"
+builddir="$srcdir/$_pkgreal-$pkgver"
+
+prepare() {
+  default_prepare
+}
+
+build() {
+  local jobs=$(($(nproc)+1))
+
+  cd "$builddir"
+
+  phpize
+
+  EXTENSION_DIR=/usr/lib/php/$_phpver/modules \
+  CFLAGS="-fstack-protector-strong -fpic -fpie -O2" \
+  CPPFLAGS="$CFLAGS" \
+  LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie" \
+  ./configure \
+    --prefix=/usr \
+    --with-php-config=/usr/bin/php-config
+
+  make -j$jobs
+}
+
+check() {
+  cd "$builddir"
+
+  local allow_fail='no'
+
+  NO_INTERACTION=1 REPORT_EXIT_STATUS=1 \
+    SKIP_SLOW_TESTS=1 SKIP_ONLINE_TESTS=1 TEST_TIMEOUT=10 \
+    TZ= LANG= LC_ALL= \
+    make test || [ "$allow_fail" = yes ]
+}
+
+package() {
+  mkdir -p "$pkgdir"
+  install -d $pkgdir/
+  make -C "$builddir" INSTALL_ROOT="$pkgdir" install
+  install -d "$pkgdir"/etc/php/$_phpver/conf.d
+  echo "extension=$_pkgreal.so" > "$pkgdir"/etc/php/$_phpver/conf.d/$_pkgreal.ini
+}
+sha512sums="61207d3f8c11b0620dbcb20fb2ebb6d1fc10159a7e879ee91556a303c3dcdf3d2571e8dda5efcbed77ff779f5c9b226aa48800630b9e7781cd964126b848c356  memcached-2.2.0.tgz"

@@ -1,0 +1,35 @@
+# Maintainer: Martin Dobrev <martin@dobrev.it>
+
+pkgver=0.11.10
+pkgrel=0
+pkgname=terraform
+pkgdesc="Write, Plan, and Create Infrastructure as Code"
+url="https://www.terraform.io/"
+arch="x86_64"
+license="Mozilla Public License 2.0"
+depends=""
+makedepends="zip"
+source="$pkgname-$pkgver.zip::https://releases.hashicorp.com/$pkgname/$pkgver/${pkgname}_${pkgver}_linux_amd64.zip
+$pkgname.bash-completion::https://raw.githubusercontent.com/Bash-it/bash-it/master/completion/available/$pkgname.completion.bash"
+subpackages="$pkgname-bash-completion:bashcomp"
+options="!check"
+
+package() {
+  install -m 0755 -D "$srcdir"/$pkgname "$pkgdir"/usr/bin/$pkgname
+}
+
+bashcomp() {
+	pkgdesc="$pkgname (bash completions)"
+	depends="$pkgname=$pkgver-r$pkgrel bash-completion"
+	url="https://github.com/Bash-it/bash-it/blob/master/completion/available/"
+	license="GNU General Public License 2.0"
+	arch="noarch"
+	install_if="$pkgname=$pkgver-r$pkgrel bash-completion"
+
+	mkdir -p "$subpkgdir"/usr/share/bash-completion/completions
+	install -m 0644 -D "$srcdir"/$pkgname.bash-completion "$subpkgdir"/usr/share/bash-completion/completions
+	mv "$subpkgdir"/usr/share/bash-completion/completions/$pkgname.bash-completion "$subpkgdir"/usr/share/bash-completion/completions/$pkgname
+}
+
+sha512sums="6f457e6e2939bf4fb656531976b8ea63865e808f4148e659362c9ca4bb006700333326e6bee6ad3a18d816b49e17998ad9b8a5fb52d87d902e244776fff00122  terraform-0.11.10.zip
+d245777665c8bb436fc511ee886153f798022c4f7c73d5fdc2b9dafd45c6d86db7b2fdd34083e36a6e48f93de79780d3275f5b078d78efdb4a28abef17dc4217  terraform.bash-completion"

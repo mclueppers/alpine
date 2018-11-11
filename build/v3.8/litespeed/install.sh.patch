@@ -1,0 +1,24 @@
+--- a/dist/install.sh
++++ b/dist/install.sh
+@@ -50,11 +50,7 @@
+     fi
+         
+     if [ "x$OS" = "xLinux" ] ; then
+-        if [ "x$OSTYPE" != "xx86_64" ] ; then
+-            $DLCMD $LSWS_HOME/admin/fcgi-bin/admin_php http://www.litespeedtech.com/packages/lsphp5_bin/i386/lsphp5
+-        else
+-            $DLCMD $LSWS_HOME/admin/fcgi-bin/admin_php http://www.litespeedtech.com/packages/lsphp5_bin/x86_64/lsphp5
+-        fi
++        ln -s /usr/bin/lsphp $LSWS_HOME/admin/fcgi-bin/admin_php
+         
+         if [ $? = 0 ] ; then 
+             HASADMINPHP=y
+@@ -235,8 +231,6 @@
+     check_os
+     if [ "x$OSNAME" = "xcentos" ] ; then
+         install_lsphp7_centos
+-    else
+-        install_lsphp7_debian
+     fi
+ }
+ 

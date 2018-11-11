@@ -1,0 +1,61 @@
+# Maintainer: Martin Dobrev <martin@dobrev.it>
+
+pkgver=3.0.3
+# Package release number is started at 100 so it overwrites the official package
+pkgrel=100
+_phpver=7.0
+_php=php$_phpver
+_pkgreal=memcached-elasticache
+pkgname=$_php-$_pkgreal
+pkgdesc="PHP $_phpver Amazon ElastiCache Cluster Client Memcached extension"
+url="https://github.com/awslabs/aws-elasticache-cluster-client-memcached-for-php"
+arch="all"
+license="PHP-3"
+depends="libmemcached-elasticache-libs $_php-common $_php-session"
+makedepends="$_php-dev $_php-session coreutils zlib-dev libmemcached-elasticache-dev cyrus-sasl-dev"
+source="https://github.com/awslabs/aws-elasticache-cluster-client-memcached-for-php/archive/php7.zip"
+builddir="$srcdir/aws-elasticache-cluster-client-memcached-for-php-php7"
+provides="php-$_pkgreal=$pkgver-r$pkgrel php7-$_pkgreal=$pkgver-r$pkgrel php-memcached=$pkgver-r$pkgrel php7-memcached=$pkgver-r$pkgrel"
+replaces="php-$_pkgreal php7-$_pkgreal php-memcached php7-memcached"
+
+prepare() {
+  default_prepare
+}
+
+build() {
+  local jobs=$(($(nproc)+1))
+
+  cd "$builddir"
+
+  phpize
+
+  EXTENSION_DIR=/usr/lib/php/$_phpver/modules \
+  CFLAGS="-fstack-protector-strong -fpic -fpie -O2" \
+  CPPFLAGS="$CFLAGS" \
+  LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie" \
+  ./configure \
+    --prefix=/usr \
+    --with-php-config=/usr/bin/php-config
+
+  make -j$jobs
+}
+
+check() {
+  cd "$builddir"
+
+  local allow_fail='no'
+
+  NO_INTERACTION=1 REPORT_EXIT_STATUS=1 \
+    SKIP_SLOW_TESTS=1 SKIP_ONLINE_TESTS=1 TEST_TIMEOUT=10 \
+    TZ= LANG= LC_ALL= \
+    make test || [ "$allow_fail" = yes ]
+}
+
+package() {
+  mkdir -p "$pkgdir"
+  install -d $pkgdir/
+  make -C "$builddir" INSTALL_ROOT="$pkgdir" install
+  install -d "$pkgdir"/etc/php/$_phpver/conf.d
+  echo "extension=memcached" > "$pkgdir"/etc/php/$_phpver/conf.d/$_pkgreal.ini
+}
+sha512sums="d50fe0af1104f82c488b5139df01c0850dbbad28fd92928a819ade2888e3a12325d785c8b2baa9aad2093c6890d452727f01661a15027281b8e0fe1dd22b0faf  php7.zip"

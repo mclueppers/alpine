@@ -1,0 +1,19 @@
+# Maintainer: Martin Dobrev <martin@dobrev.it>
+
+pkgver=1.10
+pkgrel=0
+pkgname=gosu
+pkgdesc="Simple Go-based setuid+setgid+setgroups+exec"
+url="https://github.com/tianon/gosu"
+arch="x86_64"
+license="GNU General Public License v3.0"
+depends=""
+makedepends="zip"
+source="$pkgname::https://github.com/tianon/gosu/releases/download/$pkgver/gosu-amd64"
+options="!check"
+
+package() {
+  install -m 0755 -D "$srcdir"/$pkgname "$pkgdir"/usr/bin/$pkgname
+}
+
+sha512sums="450613dd9e950f4d63bc909b386e98bde16b4617be3a67f8a70e8175cf42889ce2b9f613d18258771a780bd08e6b548e41489c9644a4e8e793b08e95b054d259  gosu"

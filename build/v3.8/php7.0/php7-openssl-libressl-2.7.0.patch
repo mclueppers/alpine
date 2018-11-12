@@ -1,0 +1,185 @@
+*** a/ext/openssl/openssl.c	2018-09-11 07:26:59.000000000 +0100
+--- b/ext/openssl/openssl.c.new	2018-11-11 15:04:35.235026290 +0000
+***************
+*** 548,554 ****
+--- 548,558 ----
+  #define EVP_PKEY_get0_DSA(_pkey) _pkey->pkey.dsa
+  #define EVP_PKEY_get0_EC_KEY(_pkey) _pkey->pkey.ec
+
++ #if defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x2070000fL
+  static int RSA_set0_key(RSA *r, BIGNUM *n, BIGNUM *e, BIGNUM *d)
++ #else
++ int RSA_set0_key(RSA *r, BIGNUM *n, BIGNUM *e, BIGNUM *d)
++ #endif
+  {
+  	r->n = n;
+  	r->e = e;
+***************
+*** 557,563 ****
+--- 561,571 ----
+  	return 1;
+  }
+
++ #if defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x2070000fL
+  static int RSA_set0_factors(RSA *r, BIGNUM *p, BIGNUM *q)
++ #else
++ int RSA_set0_factors(RSA *r, BIGNUM *p, BIGNUM *q)
++ #endif
+  {
+  	r->p = p;
+  	r->q = q;
+***************
+*** 565,571 ****
+--- 573,583 ----
+  	return 1;
+  }
+
++ #if defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x2070000fL
+  static int RSA_set0_crt_params(RSA *r, BIGNUM *dmp1, BIGNUM *dmq1, BIGNUM *iqmp)
++ #else
++ int RSA_set0_crt_params(RSA *r, BIGNUM *dmp1, BIGNUM *dmq1, BIGNUM *iqmp)
++ #endif
+  {
+  	r->dmp1 = dmp1;
+  	r->dmq1 = dmq1;
+***************
+*** 574,607 ****
+--- 586,639 ----
+  	return 1;
+  }
+
++ #if defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x2070000fL
+  static void RSA_get0_key(const RSA *r, const BIGNUM **n, const BIGNUM **e, const BIGNUM **d)
++ #else
++ void RSA_get0_key(const RSA *r, const BIGNUM **n, const BIGNUM **e, const BIGNUM **d)
++ #endif
+  {
+  	*n = r->n;
+  	*e = r->e;
+  	*d = r->d;
+  }
+
++ #if defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x2070000fL
+  static void RSA_get0_factors(const RSA *r, const BIGNUM **p, const BIGNUM **q)
++ #else
++ void RSA_get0_factors(const RSA *r, const BIGNUM **p, const BIGNUM **q)
++ #endif
+  {
+  	*p = r->p;
+  	*q = r->q;
+  }
+
++ #if defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x2070000fL
+  static void RSA_get0_crt_params(const RSA *r, const BIGNUM **dmp1, const BIGNUM **dmq1, const BIGNUM **iqmp)
++ #else
++ void RSA_get0_crt_params(const RSA *r, const BIGNUM **dmp1, const BIGNUM **dmq1, const BIGNUM **iqmp)
++ #endif
+  {
+  	*dmp1 = r->dmp1;
+  	*dmq1 = r->dmq1;
+  	*iqmp = r->iqmp;
+  }
+
++ #if defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x2070000fL
+  static void DH_get0_pqg(const DH *dh, const BIGNUM **p, const BIGNUM **q, const BIGNUM **g)
++ #else
++ void DH_get0_pqg(const DH *dh, const BIGNUM **p, const BIGNUM **q, const BIGNUM **g)
++ #endif
+  {
+  	*p = dh->p;
+  	*q = dh->q;
+  	*g = dh->g;
+  }
+
++ #if defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x2070000fL
+  static int DH_set0_pqg(DH *dh, BIGNUM *p, BIGNUM *q, BIGNUM *g)
++ #else
++ int DH_set0_pqg(DH *dh, BIGNUM *p, BIGNUM *q, BIGNUM *g)
++ #endif
+  {
+  	dh->p = p;
+  	dh->q = q;
+***************
+*** 610,622 ****
+--- 642,662 ----
+  	return 1;
+  }
+
++ #if defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x2070000fL
+  static void DH_get0_key(const DH *dh, const BIGNUM **pub_key, const BIGNUM **priv_key)
++ #else
++ void DH_get0_key(const DH *dh, const BIGNUM **pub_key, const BIGNUM **priv_key)
++ #endif
+  {
+  	*pub_key = dh->pub_key;
+  	*priv_key = dh->priv_key;
+  }
+
++ #if defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x2070000fL
+  static int DH_set0_key(DH *dh, BIGNUM *pub_key, BIGNUM *priv_key)
++ #else
++ int DH_set0_key(DH *dh, BIGNUM *pub_key, BIGNUM *priv_key)
++ #endif
+  {
+  	dh->pub_key = pub_key;
+  	dh->priv_key = priv_key;
+***************
+*** 624,630 ****
+--- 664,674 ----
+  	return 1;
+  }
+
++ #if defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x2070000fL
+  static void DSA_get0_pqg(const DSA *d, const BIGNUM **p, const BIGNUM **q, const BIGNUM **g)
++ #else
++ void DSA_get0_pqg(const DSA *d, const BIGNUM **p, const BIGNUM **q, const BIGNUM **g)
++ #endif
+  {
+  	*p = d->p;
+  	*q = d->q;
+***************
+*** 640,646 ****
+--- 684,694 ----
+  	return 1;
+  }
+
++ #if defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x2070000fL
+  static void DSA_get0_key(const DSA *d, const BIGNUM **pub_key, const BIGNUM **priv_key)
++ #else
++ void DSA_get0_key(const DSA *d, const BIGNUM **pub_key, const BIGNUM **priv_key)
++ #endif
+  {
+  	*pub_key = d->pub_key;
+  	*priv_key = d->priv_key;
+***************
+*** 654,667 ****
+--- 702,723 ----
+  	return 1;
+  }
+
++ #if defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x2070000fL
+  static const unsigned char *ASN1_STRING_get0_data(const ASN1_STRING *asn1)
++ #else
++ const unsigned char *ASN1_STRING_get0_data(const ASN1_STRING *asn1)
++ #endif
+  {
+  	return M_ASN1_STRING_data(asn1);
+  }
+
+  #if OPENSSL_VERSION_NUMBER < 0x10002000L || defined (LIBRESSL_VERSION_NUMBER)
+
++ #if defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x2070000fL
+  static int X509_get_signature_nid(const X509 *x)
++ #else
++ int X509_get_signature_nid(const X509 *x)
++ #endif
+  {
+  	return OBJ_obj2nid(x->sig_alg->algorithm);
+  }
+***************
+*** 6005,6008 ****
+   * vim600: sw=4 ts=4 fdm=marker
+   * vim<600: sw=4 ts=4
+   */
+-
+--- 6061,6063 ----

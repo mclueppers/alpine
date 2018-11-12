@@ -1,6 +1,6 @@
 # Maintainer: Martin Dobrev <martin@dobrev.it>
 
-pkgver=0.10.1
+pkgver=0.11.4
 pkgrel=0
 pkgname=vault
 pkgdesc="A Tool for Managing Secrets"
@@ -31,5 +31,5 @@ bashcomp() {
 	mv "$subpkgdir"/usr/share/bash-completion/completions/$pkgname.bash-completion "$subpkgdir"/usr/share/bash-completion/completions/$pkgname
 }
 
-sha512sums="d6091b26fc2514f57d8e6e1ec47a604cca9b0df8e436509011ded604c70b923320657e52498789f586ba77002daa9a794286d8db382236db070abfc5eb09bb0c  vault-0.10.1.zip
+sha512sums="2188bc00aef74bc2ff16496e418b13d5646b7186bd3e5d793f5b2a9aedeb2b5858fe5726f986f35022ce2d077e673f8a2ae5be3837a3ff1125e421bdb3e0cdc8  vault-0.11.4.zip
 8bf604a920df3d42251d93e1289b9bb69103d1fb5adde396236e670d64483ecf5397675ed4d457c4b7d9fbcdfbf46821716d777d59577807cdaf47860384e5af  vault.bash-completion"

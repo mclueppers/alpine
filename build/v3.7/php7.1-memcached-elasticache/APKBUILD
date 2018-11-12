@@ -58,4 +58,4 @@ package() {
   install -d "$pkgdir"/etc/php/$_phpver/conf.d
   echo "extension=memcached" > "$pkgdir"/etc/php/$_phpver/conf.d/$_pkgreal.ini
 }
-sha512sums="d50fe0af1104f82c488b5139df01c0850dbbad28fd92928a819ade2888e3a12325d785c8b2baa9aad2093c6890d452727f01661a15027281b8e0fe1dd22b0faf  php7.zip"
+sha512sums="7e12ddc6f81b524204693ea4b15722bbdb5b37ced6c89fc918a7d0d994d4ce244c1a9e388fc9afec33cf6507f07613c3ff20c0d9ff7963753d50199deb0615ce  php7.zip"

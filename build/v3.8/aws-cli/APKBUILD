@@ -2,7 +2,7 @@
 # Contributor: Valery Kartel <valery.kartel@gmail.com>
 
 pkgname=aws-cli
-pkgver=1.15.20
+pkgver=1.16.52
 pkgrel=0
 _python="python3"
 _libname=${pkgname/-/}
@@ -70,4 +70,4 @@ doc() {
 	mv "$pkgdir"/$path/examples "$pkgdir"/$path/topics \
 		"$subpkgdir"/$path/
 }
-sha512sums="e8ff1b923f755d8cd3c0b675cdb6c96311d74595b2e1b60b9972fa80f607378101e79a2e16210eb32d9cbd76f4dc3e7c4184304603585e92478b145a8848e824  aws-cli-1.15.20.tar.gz"
+sha512sums="e7bda88f8689c37256a1e186fc8586ea1bbcb2f9a1b4452eb18084ebbe87b1c7b08baf5d4f53afe3a546e3fed4fb2d5e21ac903d381116ddff0e9d2c351a7524  aws-cli-1.16.52.tar.gz"

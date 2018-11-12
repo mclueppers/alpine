@@ -1,6 +1,6 @@
 # Maintainer: Martin Dobrev <martin@dobrev.it>
 
-pkgver=8.1.0.209
+pkgver=8.3.0.226
 # Package release number is started at 100 so it overwrites the official package
 pkgrel=100
 _phpver=5.6

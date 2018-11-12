@@ -1,6 +1,6 @@
 # Maintainer: Martin Dobrev <martin@dobrev.it>
 
-pkgver=1.10
+pkgver=1.11
 pkgrel=0
 pkgname=gosu
 pkgdesc="Simple Go-based setuid+setgid+setgroups+exec"
@@ -16,4 +16,4 @@ package() {
   install -m 0755 -D "$srcdir"/$pkgname "$pkgdir"/usr/bin/$pkgname
 }
 
-sha512sums="450613dd9e950f4d63bc909b386e98bde16b4617be3a67f8a70e8175cf42889ce2b9f613d18258771a780bd08e6b548e41489c9644a4e8e793b08e95b054d259  gosu"
+sha512sums="ebbf31eeae593c5a19ffbf3c94c693ac797e66f04492ab4bbf8f600651be5084e148f6b16af36e54d2047bfe48499066d3b8a59621a4f02d099b75dc28abc09e  gosu"

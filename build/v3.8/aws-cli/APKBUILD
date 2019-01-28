@@ -2,7 +2,7 @@
 # Contributor: Valery Kartel <valery.kartel@gmail.com>
 
 pkgname=aws-cli
-pkgver=1.16.52
+pkgver=1.16.96
 pkgrel=0
 _python="python3"
 _libname=${pkgname/-/}
@@ -11,7 +11,7 @@ url="https://github.com/aws/aws-cli"
 arch="noarch"
 license="Apache-2.0"
 provides=$_libname
-depends="$_python groff py3-botocore py3-jmespath py3-s3transfer py3-docutils py3-colorama py3-yaml py3-rsa"
+depends="$_python groff py3-botocore py3-jmespath py3-s3transfer py3-docutils py3-colorama py3-yaml py3-rsa py3-urllib3"
 makedepends="$_python-dev py-setuptools"
 subpackages="$pkgname-doc $pkgname-zsh-completion:zshcomp $pkgname-bash-completion:bashcomp $pkgname-completer"
 source="$pkgname-$pkgver.tar.gz::https://github.com/aws/$pkgname/archive/$pkgver.tar.gz"
@@ -70,4 +70,4 @@ doc() {
 	mv "$pkgdir"/$path/examples "$pkgdir"/$path/topics \
 		"$subpkgdir"/$path/
 }
-sha512sums="e7bda88f8689c37256a1e186fc8586ea1bbcb2f9a1b4452eb18084ebbe87b1c7b08baf5d4f53afe3a546e3fed4fb2d5e21ac903d381116ddff0e9d2c351a7524  aws-cli-1.16.52.tar.gz"
+sha512sums="c4b72eef15d9acbabf781f7c79a8532c8efe21eb8d3d9214e2a4fd0a24efc010febc2eb67805b48af0dccac985337ce7ff5ac1fe2accd4f2be06fb3fbb7e49c1  aws-cli-1.16.96.tar.gz"

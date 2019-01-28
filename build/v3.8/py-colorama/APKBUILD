@@ -2,7 +2,7 @@
 # Maintainer: Fabian Affolter <fabian@affolter-engineering.ch>
 pkgname=py-colorama
 _pkgname=colorama
-pkgver=0.3.9
+pkgver=0.4.1
 pkgrel=0
 pkgdesc="Simple cross-platform colored terminal text"
 url="https://pypi.python.org/pypi/colorama"
@@ -42,4 +42,4 @@ _py() {
 	cd "$builddir"
 	$python setup.py install --prefix=/usr --root="$subpkgdir"
 }
-sha512sums="248e3d3d1f95cb85baf55ef4d705508213b81edfb04b39fe9a7bc9c7ac564986726ab6e9d9f73d64ee02e1c9b86d4c6bba40543590dbd170180a37d69e07b627  colorama-0.3.9.tar.gz"
+sha512sums="5d0ea1ae1b6e499c4c15845d69670555386283c5b9ebc7580aacc3edeb3088056f8842c740b26b2bdadc0d02e778282d47307db0f658662c5afab3c4beb65586  colorama-0.4.1.tar.gz"

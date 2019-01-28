@@ -1,7 +1,7 @@
 # Maintainer: Valery Kartel <valery.kartel@gmail.com>
 # Contributor: Valery Kartel <valery.kartel@gmail.com>
 pkgname=py-botocore
-pkgver=1.8.20
+pkgver=1.12.86
 pkgrel=0
 _pkgreal=${pkgname#py-}
 pkgdesc="The low-level, core functionality of Boto3"
@@ -50,4 +50,4 @@ _py() {
 	cd "$builddir"
 	$python setup.py install --prefix=/usr --root="$subpkgdir"
 }
-sha512sums="0b822bff75ef26c7e996e354a5c06cb50eb13d7e58f65297adcf023a81084c8b98500c08b906dcfd346e2dadcdde33d472d6d51c3e081af8667c5adcdd2deffd  botocore-1.8.20.tar.gz"
+sha512sums="b835070a68607592dab55d74ae41fe59c4bb450f7754a385ee8499706dc5f6f76a2cb9fd349ac2557dfeff6c6036f9b39ce2901bc8d825c17572766b18e3fdd5  botocore-1.12.86.tar.gz"

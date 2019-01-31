@@ -1,6 +1,6 @@
 # Maintainer: Martin Dobrev <martin@dobrev.it>
 
-pkgver=8.3.0.226
+pkgver=8.5.0.235
 # Package release number is started at 100 so it overwrites the official package
 pkgrel=100
 _phpver=5.6
@@ -46,4 +46,4 @@ package() {
   sudo cp /etc/php/$_phpver/conf.d/newrelic.ini "$pkgdir/etc/php/$_phpver/conf.d/"
 }
 
-sha512sums="31a1604db00d33ee18c4392e89c8651528ff7b6af190562bdadc6c26fed4d4e8a63809a7319f0541a0db4d1bbaf716650ea4ae1148bda6476b6bfa0076071279  newrelic-php5-8.1.0.209-linux-musl.tar.gz"
+sha512sums="669d02eeb5d1d5d772716353f6d579dcea0f046484961d454f6e95f4fb2278bdc46953d83fa4d95a6c9c253c1680cfbfd12d1687e14169416adb59b84ccbadbb  newrelic-php5-8.5.0.235-linux-musl.tar.gz"

@@ -1,0 +1,49 @@
+# Contributor: Martin Dobrev <martin@dobrev.it>
+# Maintainer: Martin Dobrev <martin@dobrev.it>
+
+pkgname=py-diamond
+_pkgname=${pkgname#py-}
+pkgver=4.0.515
+pkgrel=0
+pkgdesc="Simple cross-platform colored terminal text"
+url="https://pypi.python.org/pypi/colorama"
+arch="noarch"
+license="MIT License"
+makedepends="python2-dev python3-dev py-setuptools"
+#subpackages="py2-${pkgname#py-}:_py2 py3-${pkgname#py-}:_py3"
+subpackages="py2-${pkgname#py-}:_py2"
+source="$_pkgname-$pkgver.tar.gz::https://github.com/python-diamond/Diamond/archive/v$pkgver.tar.gz"
+builddir="$srcdir"/Diamond-$pkgver
+options="!check"
+
+build() {
+	cd "$builddir"
+	python2 setup.py build || return 1
+	python3 setup.py build || return 1
+}
+
+package() {
+	mkdir -p "$pkgdir"
+}
+
+_py2() {
+	replaces="$pkgname"
+	depends="py2-configobj py2-setuptools py2-six"
+	_py python2
+}
+
+_py3() {
+	_py python3
+}
+
+_py() {
+	local python="$1"
+	pkgdesc="$pkgdesc (for $python)"
+	depends="$depends $python"
+	install_if="$pkgname=$pkgver-r$pkgrel $python"
+
+	cd "$builddir"
+	$python setup.py install --prefix=/usr --root="$subpkgdir"
+}
+
+sha512sums="660dc3830630bea3090c3fd4284813eb1f4c3b18a6e84e147a232929a37442aea03c5065c6e27e80a822914207506e2924ba6949076e84411a1700751567722f  diamond-4.0.515.tar.gz"

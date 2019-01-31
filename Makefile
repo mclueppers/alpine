@@ -13,9 +13,13 @@ build-v37: ## Build Alpine v3.7 container
 build-v38: ## Build Alpine v3.8 container
   @docker image build -t dobrevit-abuild:v3.8 -f .docker/abuild/Dockerfile-3.8 .docker/abuild
 
+build-v39: ## Build Alpine v3.9 container
+  @docker image build -t dobrevit-abuild:v3.9 -f .docker/abuild/Dockerfile-3.9 .docker/abuild
+
 build: ## Build necessary Docker image for building packages
   @make build-v37
   @make build-v38
+  @make build-v39
 
 run: ## Run a command in a new Docker container; make run a=[...]
   make build

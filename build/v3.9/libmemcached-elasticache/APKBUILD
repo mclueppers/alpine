@@ -1,0 +1,48 @@
+# Maintainer: Martin Dobrev <martin@dobrev.it>
+pkgname=libmemcached-elasticache
+pkgver=1.0.18
+pkgrel=100
+pkgdesc="Client library and command line tools for memcached server"
+url="http://libmemcached.org/"
+arch="all"
+license="BSD"
+options="!check" # tests are broken
+depends=""
+depends_dev="cyrus-sasl-dev"
+makedepends="$depends_dev libevent-dev gcc g++ make autoconf automake libtool file zlib-dev re2c sed memcached-dev"
+install=""
+subpackages="$pkgname-dev $pkgname-doc $pkgname-libs"
+source="https://github.com/jdolinski/aws-elasticache-cluster-client-libmemcached/archive/master.zip
+    musl-fixes.patch"
+
+builddir="$srcdir/aws-elasticache-cluster-client-libmemcached-master"
+
+build() {
+	cd "$builddir"
+	rm -rf build-aux/ configure mem_config.in Makefile.in aclocal.m4
+    autoreconf -ivf
+    ln -s build-aux/install-sh
+    ln -s build-aux/missing
+    mkdir BUILD
+    cd BUILD
+    ../configure \
+    	--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--with-pic
+    sed -i "s#^static char \*\*environ= NULL;#char \*\*environ= NULL;#" ../libtest/cmdline.cc
+    make
+}
+
+check() {
+	cd "$builddir/BUILD"
+	make check || { find . -name 'test-suite.log' -exec cat '{}' ';'; return 1; }
+}
+
+package() {
+	cd "$builddir/BUILD"
+	make -j1 AM_MAKEFLAGS= DESTDIR="$pkgdir" install
+}
+
+sha512sums="c23885e81f30af85508f013a8e01c35f6946b91a7bfbd6dc3980d4e15bb4619a89a331f44a6007ab38cce69cc9446a85150fe9d5a21b517eb73556a20ca44ce3  master.zip
+4593868606b9625d0850fbfb0df59247271d86f78b5243e5c082e8226e5ab179d7abadf056b9a56dc67cea7d5fcdcdb797fa8b5afb519001d1867ded31931967  musl-fixes.patch"

@@ -18,7 +18,7 @@ arch="all"
 license="custom"
 depends=""
 makedepends="linux-headers gd-dev geoip-dev libxml2-dev libxslt-dev
-	libressl-dev paxmark pcre-dev perl-dev pkgconf zlib-dev"
+	libressl-dev paxmark pcre-dev perl-dev pkgconf zlib-dev libmodsecurity-dev"
 checkdepends="perl perl-fcgi perl-io-socket-ssl perl-net-ssleay
 	perl-protocol-websocket uwsgi-python"
 pkgusers="nginx"
@@ -79,6 +79,11 @@ _add_module "http-echo" "v0.61" "https://github.com/openresty/echo-nginx-module"
 
 _add_module "http-fancyindex" "v0.4.2" "https://github.com/aperezdc/ngx-fancyindex"
 
+_add_module "http-modsecurity" "v1.0.0" "https://github.com/SpiderLabs/ModSecurity-nginx"
+_http_modsecurity_so="ngx_http_modsecurity_module.so"
+_http_modsecurity_depends="libmodsecurity"
+_http_modsecurity_provides="modsecurity"
+
 _add_module "http-headers-more" "v0.32" "https://github.com/openresty/headers-more-nginx-module"
 _http_headers_more_so="ngx_http_headers_more_filter_module.so"
 
@@ -133,6 +138,7 @@ build() {
 
 	export LUAJIT_LIB="$(pkgconf --variable=libdir luajit)"
 	export LUAJIT_INC="$(pkgconf --variable=includedir luajit)"
+
 	./configure \
 		--prefix=/var/lib/$pkgname \
 		--sbin-path=/usr/sbin/$pkgname \
@@ -226,6 +232,7 @@ package() {
 	install -dm755 -g $_grp_www ./var/www/localhost/htdocs
 
 	install -dm755 ./var/log
+	install -dm755 ./run/$pkgname
 	mv ./var/lib/$pkgname/logs ./var/log/$pkgname
 
 	ln -sf /$_modules_dir ./var/lib/$pkgname/modules
@@ -275,6 +282,7 @@ eb183860cd511361346e4079c1fcf470985e1c3b2a034a57f8b2a92ba851fed99256261f9b779770
 1c2e6f5026becbd7bdf9feb920f10c19c6c5487600008161b045e9d6b5ea0269af68a2869e57b528bc921d549c541e6dbb02eb2ef26416a22d5d5a7f3ffc552b  ngx_cache_purge-2.4.2.tar.gz
 c90b81a4e85a8e9beeb5ff591dc91adb25fa4e0b6cb47086b577e5fa36db2368442dd011187675e358781956c364b949bc4d920ca2b534481b21c9987d2a9a3b  echo-nginx-module-0.61.tar.gz
 aee121e4d25872f0eee6c8150c8c732767ab24c61dc4f6e3f86bd6edc53ad715f3c23045362954a1ad2086ff1002bca821b2e9a53b58b077cbda91a95077ef76  ngx-fancyindex-0.4.2.tar.gz
+e6f1019e7fd1472288de737722babe9291e1e59b45549ee5353c71d74460cf1a7c739ba2a737e53c33b664863ad4385f2c9e1b53d6a430bb1f7724a9c893280a  ModSecurity-nginx-1.0.0.tar.gz
 e42582b45c3111de3940bbeb67ce161aca2d55adcfb00c61c12256fa0e36221d38723013f36edbcf6d1b520f8dfb49d4657df8a956e66d36e68425afad382bd1  headers-more-nginx-module-0.32.tar.gz
 3440e3fe714407f0ff61e0da207669655b443f7b70ef8a91693ea05ed96d8fde349d9c8ea30d5ff53ea3f8e4a5c7d0a2834e136c340b1b1365d62006339a1e4d  lua-nginx-module-0.10.10.tar.gz
 72887c4490854b099cb26bb3f840073a36b0d812bde4486f04dc1be182ca74f0d1e3fd709e77c240c2dcf37665f74cf04e188ea9efe8e127c6789b27b487d0cd  lua-upstream-nginx-module-0.07.tar.gz

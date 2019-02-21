@@ -1,0 +1,59 @@
+# Maintainer: Martin Dobrev <martin@dobrev.eu>
+
+pkgver=0.13.3
+pkgrel=0
+_phpver=7.1
+_php=php$_phpver
+_pkgreal=datadog_trace
+pkgname=$_php-$_pkgreal-beta
+pkgdesc="Datadog Tracing PHP $_phpver Client extension (Beta)"
+url="https://github.com/DataDog/dd-trace-php.git"
+arch="all"
+license="BSD 3-Clause"
+depends="$_php-common libexecinfo"
+makedepends="$_php-dev coreutils libexecinfo libexecinfo-dev"
+source="$_pkgreal-$pkgver.tar.gz::https://pecl.php.net/get/datadog_trace-$pkgver.tgz"
+builddir="$srcdir/$_pkgreal-$pkgver"
+
+prepare() {
+  default_prepare
+}
+
+build() {
+  local jobs=$(($(nproc)+1))
+
+  cd "$builddir"/
+
+  phpize
+
+  EXTENSION_DIR=/usr/lib/php/$_phpver/modules \
+  CFLAGS="-fstack-protector-strong -fpic -fpie -O2" \
+  CPPFLAGS="$CFLAGS" \
+  LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie -lexecinfo" \
+  ./configure \
+    --prefix=/usr \
+    --with-php-config=/usr/bin/php-config \
+    --enable-ddtrace
+
+  make -j $jobs
+}
+
+check() {
+  cd "$builddir"/
+
+  local allow_fail='yes'
+
+  NO_INTERACTION=1 REPORT_EXIT_STATUS=1 \
+    SKIP_SLOW_TESTS=1 SKIP_ONLINE_TESTS=1 TEST_TIMEOUT=10 \
+    TZ= LANG= LC_ALL= \
+    make test || [ "$allow_fail" = yes ]
+}
+
+package() {
+  mkdir -p "$pkgdir"
+  install -d $pkgdir/
+  make -C "$builddir"/ INSTALL_ROOT="$pkgdir" install
+  install -d "$pkgdir"/etc/php/$_phpver/conf.d
+  echo "extension=ddtrace.so" > "$pkgdir"/etc/php/$_phpver/conf.d/$_pkgreal.ini
+}
+sha512sums="a99a6371566e10a1e56d2f870244c4a11fb20dcc09153a3854d8715b9f1c7a6cd01c9e451230039f08b0eee3184e331405cc92540fc1152bf23d4882df359b7e  datadog_trace-0.13.3.tar.gz"

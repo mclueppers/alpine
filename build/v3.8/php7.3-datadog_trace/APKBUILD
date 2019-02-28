@@ -2,7 +2,7 @@
 
 pkgver=0.14.2
 pkgrel=0
-_phpver=7.1
+_phpver=7.4
 _php=php$_phpver
 _pkgreal=datadog_trace
 pkgname=$_php-$_pkgreal-beta

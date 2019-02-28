@@ -1,6 +1,6 @@
 # Maintainer: Martin Dobrev <martin@dobrev.eu>
 
-pkgver=0.14.1
+pkgver=0.14.2
 pkgrel=0
 _phpver=7.1
 _php=php$_phpver
@@ -12,8 +12,8 @@ arch="all"
 license="BSD 3-Clause"
 depends="$_php-common libexecinfo"
 makedepends="$_php-dev coreutils libexecinfo libexecinfo-dev"
-source="$_pkgreal-$pkgver.tar.gz::https://pecl.php.net/get/datadog_trace-$pkgver.tgz"
-builddir="$srcdir/$_pkgreal-$pkgver"
+source="$_pkgreal-$pkgver.tar.gz::https://github.com/DataDog/dd-trace-php/archive/$pkgver.tar.gz"
+builddir="$srcdir/dd-trace-php-$pkgver"
 
 prepare() {
   default_prepare
@@ -56,4 +56,4 @@ package() {
   install -d "$pkgdir"/etc/php/$_phpver/conf.d
   echo "extension=ddtrace.so" > "$pkgdir"/etc/php/$_phpver/conf.d/$_pkgreal.ini
 }
-sha512sums="a99a6371566e10a1e56d2f870244c4a11fb20dcc09153a3854d8715b9f1c7a6cd01c9e451230039f08b0eee3184e331405cc92540fc1152bf23d4882df359b7e  datadog_trace-0.13.3.tar.gz"
+sha512sums="31a08fc563392c252d65fdcdef5f3e9abb58d661f4f4b2e325cc349ffef8c6355e6df6635227f0e84c4143e93243e2b350c6127fd29398ff7fc5d2175998abcf  datadog_trace-0.13.4.tar.gz"

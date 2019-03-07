@@ -1,12 +1,12 @@
 # Maintainer: Martin Dobrev <martin@dobrev.eu>
 
-pkgver=0.14.2
+pkgver=0.15.0
 pkgrel=0
 _phpver=7.1
 _php=php$_phpver
 _pkgreal=datadog_trace
-pkgname=$_php-$_pkgreal-beta
-pkgdesc="Datadog Tracing PHP $_phpver Client extension (Beta)"
+pkgname=$_php-$_pkgreal
+pkgdesc="Datadog Tracing PHP $_phpver Client extension"
 url="https://github.com/DataDog/dd-trace-php.git"
 arch="all"
 license="BSD 3-Clause"
@@ -56,4 +56,4 @@ package() {
   install -d "$pkgdir"/etc/php/$_phpver/conf.d
   echo "extension=ddtrace.so" > "$pkgdir"/etc/php/$_phpver/conf.d/$_pkgreal.ini
 }
-sha512sums="31a08fc563392c252d65fdcdef5f3e9abb58d661f4f4b2e325cc349ffef8c6355e6df6635227f0e84c4143e93243e2b350c6127fd29398ff7fc5d2175998abcf  datadog_trace-0.13.4.tar.gz"
+sha512sums="07513dc4ad2d0060e79c1271c1197a1f1f746ee72f16c743fecd5d14cef13142440a991b000606117900b16a0387e5437dd2fd125e39758065e39f298020d2ed  datadog_trace-0.15.0.tar.gz"

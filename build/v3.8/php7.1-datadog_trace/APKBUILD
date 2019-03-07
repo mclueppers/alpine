@@ -56,4 +56,3 @@ package() {
   install -d "$pkgdir"/etc/php/$_phpver/conf.d
   echo "extension=ddtrace.so" > "$pkgdir"/etc/php/$_phpver/conf.d/$_pkgreal.ini
 }
-sha512sums="a99a6371566e10a1e56d2f870244c4a11fb20dcc09153a3854d8715b9f1c7a6cd01c9e451230039f08b0eee3184e331405cc92540fc1152bf23d4882df359b7e  datadog_trace-0.13.3.tar.gz"

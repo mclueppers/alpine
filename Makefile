@@ -1,4 +1,4 @@
-VER := $(or ${ALPINE_VERSION},${ALPINE_VERSION},v3.8)
+VER := $(or ${ALPINE_VERSION},${ALPINE_VERSION},v3.10)
 .RECIPEPREFIX +=
 .DEFAULT_GOAL := help
 .PHONY: *
@@ -16,10 +16,14 @@ build-v38: ## Build Alpine v3.8 container
 build-v39: ## Build Alpine v3.9 container
   @docker image build -t dobrevit-abuild:v3.9 -f .docker/abuild/Dockerfile-3.9 .docker/abuild
 
+build-v310: ## Build Alpine v3.10 container
+  @docker image build -t dobrevit-abuild:v3.10 -f .docker/abuild/Dockerfile-3.10 .docker/abuild
+
 build: ## Build necessary Docker image for building packages
   @make build-v37
   @make build-v38
   @make build-v39
+  @make build-v310
 
 run: ## Run a command in a new Docker container; make run a=[...]
   make build
@@ -33,7 +37,7 @@ generate-index: ## Generate index file APKINDEX.tar.gz usage: make generate-inde
   make run a="generate-index $(VER)"
 
 private-key: ## Generate new private key
-  make run a="openssl genrsa -out dobrevit.rsa.priv 4096 --build --force-recreate"
+  make run a="openssl genrsa -out dobrevit.rsa.priv 4096"
 
 public-key: ## Generate new public key
   make run a="openssl rsa -in dobrevit.rsa.priv -pubout -out /public/dobrevit.rsa.pub"

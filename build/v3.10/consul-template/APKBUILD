@@ -1,0 +1,19 @@
+# Maintainer: Martin Dobrev <martin@dobrev.it>
+
+pkgver=0.20.0
+pkgrel=0
+pkgname=consul-template
+pkgdesc="Template rendering, notifier, and supervisor for Hashicorp Consul and Vault data."
+url="https://www.consul.io/"
+arch="x86_64"
+license="Mozilla Public License 2.0"
+depends=""
+makedepends="zip"
+source="$pkgname-$pkgver.zip::https://releases.hashicorp.com/$pkgname/$pkgver/${pkgname}_${pkgver}_linux_amd64.zip"
+options="!check"
+
+package() {
+  install -m 0755 -d "$pkgdir"/etc/consul-template
+  install -m 0755 -D "$srcdir"/$pkgname "$pkgdir"/usr/bin/$pkgname
+}
+sha512sums="ecf3d3980aed603f6c80ce57ec23ed76d0ea06d751a31ab090adb46a8ec6e2173957d5890f25333f616b1826ce3ddb21a2ce42d36101a3e2d20a44f2e51512c4  consul-template-0.20.0.zip"

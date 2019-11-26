@@ -1,6 +1,6 @@
 # Maintainer: Martin Dobrev <martin@dobrev.eu>
 
-pkgver=0.15.0
+pkgver=0.21.0
 pkgrel=0
 _phpver=7.3
 _php=php$_phpver
@@ -56,4 +56,4 @@ package() {
   install -d "$pkgdir"/etc/php/$_phpver/conf.d
   echo "extension=ddtrace.so" > "$pkgdir"/etc/php/$_phpver/conf.d/$_pkgreal.ini
 }
-sha512sums="07513dc4ad2d0060e79c1271c1197a1f1f746ee72f16c743fecd5d14cef13142440a991b000606117900b16a0387e5437dd2fd125e39758065e39f298020d2ed  datadog_trace-0.15.0.tar.gz"
+sha512sums="53ff088992cea1c9a7dc4020b8a0c605f8397f955c6adde820711bdacd2c6040404d30c3939c1cfa1f0e631685c5538f9abcc9a9888e2403e00d416eafdfcc97  datadog_trace-0.21.0.tar.gz"

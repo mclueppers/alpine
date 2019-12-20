@@ -19,7 +19,7 @@ build: $(targets) ## Build necessary Docker image for building packages
 .build.%: TARGET=$(shell echo $* | sed -e 's/\://g')
 .build.%:
   @echo '> Creating Alpine $(TARGET) abuild container'
-  @docker image build -t dobrevit-abuild:v$(TARGET)  -f .docker/abuild/Dockerfile-$(TARGET) .docker/abuild
+  @docker image build --build-arg IMAGE_TAG=$(TARGET) -t dobrevit-abuild:v$(TARGET)  -f .docker/abuild/Dockerfile .docker/abuild
   @touch .build.$(TARGET)
 
 run: build ## Run a command in a new Docker container; make run a=[...]
@@ -44,5 +44,6 @@ clean: ## Remove pkg, src, tmp and log folders when building packages for Alpine
 sh: ## Run shell
   make run a=sh
 
+upload: ARCH=$(shell docker run --rm dobrevit-abuild:v$(VER) apk --print-arch)
 upload: ## Upload build packages to Linux repos server
-  @rsync -avz --del public/ root@repos.dobrev.it:/var/www/html/alpine/
+  @rsync -avz --del public/v$(VER)/$(ARCH) root@repos.dobrev.it:/var/www/html/alpine/public/v$(VER)/

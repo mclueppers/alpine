@@ -1,33 +1,29 @@
-VER := $(or ${ALPINE_VERSION},${ALPINE_VERSION},v3.10)
+VER := $(or ${ALPINE_VERSION},${ALPINE_VERSION},3.10)
 .RECIPEPREFIX +=
 .DEFAULT_GOAL := help
-.PHONY: *
+STEPS := build run package clean sh upload public-key private-key generate-index
+ALPINE_VERSIONS := 3.7 3.8 3.9 3.10
+
+targets = $(foreach ver,$(ALPINE_VERSIONS),.build.$(ver))
+
+$(ALPINE_VERSIONS): %: .build.%:
+
+.PHONY: $(STEPS) $(ALPINE_VERSIONS)
 
 help:
   @echo "\033[33mUsage:\033[0m\n  make [target] [arg=\"val\"...]\n\n\033[33mTargets:\033[0m"
   @grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[32m%-15s\033[0m %s\n", $$1, $$2}'
 
-build-v37: ## Build Alpine v3.7 container
-  @docker image build -t dobrevit-abuild:v3.7 -f .docker/abuild/Dockerfile-3.7 .docker/abuild
+build: $(targets) ## Build necessary Docker image for building packages
 
-build-v38: ## Build Alpine v3.8 container
-  @docker image build -t dobrevit-abuild:v3.8 -f .docker/abuild/Dockerfile-3.8 .docker/abuild
+.build.%: TARGET=$(shell echo $* | sed -e 's/\://g')
+.build.%:
+  @echo '> Creating Alpine $(TARGET) abuild container'
+  @docker image build -t dobrevit-abuild:v$(TARGET)  -f .docker/abuild/Dockerfile-$(TARGET) .docker/abuild
+  @touch .build.$(TARGET)
 
-build-v39: ## Build Alpine v3.9 container
-  @docker image build -t dobrevit-abuild:v3.9 -f .docker/abuild/Dockerfile-3.9 .docker/abuild
-
-build-v310: ## Build Alpine v3.10 container
-  @docker image build -t dobrevit-abuild:v3.10 -f .docker/abuild/Dockerfile-3.10 .docker/abuild
-
-build: ## Build necessary Docker image for building packages
-  @make build-v37
-  @make build-v38
-  @make build-v39
-  @make build-v310
-
-run: ## Run a command in a new Docker container; make run a=[...]
-  make build
-  @docker run -it --rm -v `pwd`/build:/build -v `pwd`/public:/public dobrevit-abuild:$(VER) $(a)
+run: build ## Run a command in a new Docker container; make run a=[...]
+  @docker run -it --rm -v `pwd`/build:/build -v `pwd`/public:/public dobrevit-abuild:v$(VER) $(a)
 
 package: ## Usage: make package [p="5.6|7.0|7.1|7.2|all|<package-name1> <package-name2> ..."]
   @test $(p)
@@ -43,7 +39,7 @@ public-key: ## Generate new public key
   make run a="openssl rsa -in dobrevit.rsa.priv -pubout -out /public/dobrevit.rsa.pub"
 
 clean: ## Remove pkg, src, tmp and log folders when building packages for Alpine
-  @rm -rf build/$(VER)/*/pkg build/$(VER)/*/src build/$(VER)/*/tmp log/*
+  @rm -rf build/$(VER)/*/pkg build/$(VER)/*/src build/$(VER)/*/tmp log/* .build.*
 
 sh: ## Run shell
   make run a=sh

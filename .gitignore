@@ -9,3 +9,4 @@
 /.docker/abuild/home/packager/.abuild/dobrevit.rsa.priv
 /log/*
 !/log/.gitkeep
+**/.build.*

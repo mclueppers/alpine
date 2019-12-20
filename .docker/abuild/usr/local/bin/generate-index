@@ -4,9 +4,10 @@
 # Usage generate-index [repository]
 
 REPO="${1:-v3.7}"
+ARCH=$(apk --print-arch)
 
-cd /public/$REPO/x86_64
-apk index -o APKINDEX.unsigned.tar.gz *.apk --rewrite-arch x86_64
+cd /public/$REPO/$ARCH
+apk index -o APKINDEX.unsigned.tar.gz *.apk --rewrite-arch $ARCH
 openssl dgst -sha1 -sign /build/dobrevit.rsa.priv -out .SIGN.RSA.dobrevit.rsa.pub APKINDEX.unsigned.tar.gz
 tar -c .SIGN.RSA.dobrevit.rsa.pub | abuild-tar --cut | gzip -9 > signature.tar.gz
 cat signature.tar.gz APKINDEX.unsigned.tar.gz > APKINDEX.tar.gz

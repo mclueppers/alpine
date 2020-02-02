@@ -1,8 +1,8 @@
-VER := $(or ${ALPINE_VERSION},${ALPINE_VERSION},3.10)
+VER := $(or ${ALPINE_VERSION},${ALPINE_VERSION},3.11)
 .RECIPEPREFIX +=
 .DEFAULT_GOAL := help
 STEPS := build run package clean sh upload public-key private-key generate-index
-ALPINE_VERSIONS := 3.7 3.8 3.9 3.10
+ALPINE_VERSIONS := 3.7 3.8 3.9 3.10 3.11
 
 targets = $(foreach ver,$(ALPINE_VERSIONS),.build.$(ver))
 

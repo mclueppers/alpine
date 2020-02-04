@@ -47,4 +47,4 @@ sh: ## Run shell
 
 upload: ARCH=$(shell docker run --rm dobrevit-abuild:v$(VER) apk --print-arch)
 upload: ## Upload build packages to Linux repos server
-  @rsync -avz --del public/v$(VER)/$(ARCH) root@repos.dobrev.it:/var/www/html/alpine/public/v$(VER)/
+  @rsync -avz --del public/v$(VER)/$(ARCH) root@repos.dobrev.it:/var/www/html/alpine/v$(VER)/

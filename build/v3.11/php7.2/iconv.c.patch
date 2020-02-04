@@ -1,0 +1,11 @@
+--- a/ext/iconv/iconv.c
++++ b/ext/iconv/iconv.c
+@@ -287,7 +286,7 @@
+ 	{
+ 		static char buf[16];
+ 		snprintf(buf, sizeof(buf), "%d.%d",
+-			_libiconv_version >> 8, _libiconv_version & 0xff);
++			_LIBICONV_VERSION >> 8, _LIBICONV_VERSION & 0xff);
+ 		version = buf;
+ 	}
+ #elif HAVE_GLIBC_ICONV

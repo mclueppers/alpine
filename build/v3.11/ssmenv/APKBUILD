@@ -1,0 +1,19 @@
+# Maintainer: Martin Dobrev <martin@dobrev.it>
+
+pkgver=0.1.0
+pkgrel=0
+pkgname=ssmenv
+pkgdesc="A tool to use Amazon EC2 Systems Manager (AWS SSM) Parameter Store as environment variables"
+url="https://github.com/m4i/ssmenv"
+arch="x86_64"
+license="MIT License"
+depends=""
+makedepends=""
+source="$pkgname-$pkgver::https://github.com/m4i/$pkgname/releases/download/v${pkgver}/${pkgname}_linux_amd64"
+options="!check"
+
+package() {
+  install -m 0755 -D "$srcdir"/$pkgname-$pkgver "$pkgdir"/usr/bin/$pkgname
+}
+
+sha512sums="fec509a727b7602e2d63dab8e50b34e49015d7848566f02d646920efefb5b9ac3faaebeeafeb9680849777af8dd59f05491919e3c539216a5addf0be0f64255c  ssmenv-0.1.0"

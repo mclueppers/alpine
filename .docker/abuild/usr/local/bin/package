@@ -9,6 +9,10 @@ BUILD_PACKAGES="${2:-all}"
 
 packages_others="
 argon2
+py-jmespath
+py-botocore
+py-s3transfer
+py-colorama
 aws-cli
 clair-scanner
 composer
@@ -25,6 +29,7 @@ pickle
 ssmenv
 terraform
 vault
+py-envtpl
 "
 
 packages_56="
@@ -118,6 +123,26 @@ php7.3-swoole
 php7.3-xdebug
 php7.3-yaml
 "
+
+packages_74="
+php7.4-apcu
+php7.4-composer
+php7.4-datadog_trace
+php7.4-imagick
+php7.4-mcrypt
+php7.4-memcached
+php7.4-memcached-elasticache
+php7.4-meminfo
+php7.4-mongodb
+php7.4-newrelic-php_agent
+php7.4-phpunit
+php7.4-pickle
+php7.4-redis
+php7.4-swoole
+php7.4-xdebug
+php7.4-yaml
+"
+
 # To build PHP Pecl extensions and some packages, we'll need some deps from the
 # local PHP.earth Alpine repository
 mkdir -p /public/${ALPINE_VERSION}/${ALPINE_ARCH}
@@ -134,12 +159,14 @@ elif [ "$BUILD_PACKAGES" = "7.2" ]; then
   packages=$packages_72
 elif [ "$BUILD_PACKAGES" = "7.3" ]; then
   packages=$packages_73
+elif [ "$BUILD_PACKAGES" = "7.4" ]; then
+  packages=$packages_74
 elif [ "$BUILD_PACKAGES" = "other" ]; then
   packages=$packages_others
 elif [ "$BUILD_PACKAGES" = "php_all" ]; then
-  packages="php5.6 $packages_56 php7.0 $packages_70 php7.1 $packages_71 php7.2 $packages_72 php7.3 $packages_73"
+  packages="php5.6 $packages_56 php7.0 $packages_70 php7.1 $packages_71 php7.2 $packages_72 php7.3 $packages_73 php7.4 $packages_74"
 elif [ "$BUILD_PACKAGES" = "all" ]; then
-  packages="$packages_56 $packages_70 $packages_71 $packages_72 $packages_73"
+  packages="$packages_56 $packages_70 $packages_71 $packages_72 $packages_73 $packages_74"
 else
   packages="$BUILD_PACKAGES"
 fi

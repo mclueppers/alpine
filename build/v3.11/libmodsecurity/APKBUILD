@@ -1,0 +1,54 @@
+# Maintainer: Martin Dobrev <martin@dobrev.it>
+pkgname=libmodsecurity
+_pkgname=ModSecurity
+pkgver=3.0.3
+pkgrel=100
+pkgdesc="Open source, cross platform web application firewall (WAF) engine"
+url="http://modsecurity.org/"
+arch="all"
+license="Apache License 2.0"
+options="!check" # tests are broken
+depends=""
+depends_dev=""
+makedepends="$depends_dev libevent-dev gcc linux-headers make autoconf automake
+    libtool file zlib-dev pcre-dev apr-dev libxml2-dev apache2-dev lua-dev
+    yajl-dev curl-dev geoip-dev"
+install=""
+subpackages="$pkgname-dev"
+source="$pkgname-$pkgver.tar.gz::https://github.com/SpiderLabs/ModSecurity/archive/v$pkgver.tar.gz"
+_giturl="https://github.com/SpiderLabs/ModSecurity.git"
+_gittag="v$pkgver"
+builddir="$srcdir/$_pkgname"
+
+build() {
+  mkdir -p "$srcdir"
+  if ! [ -d $_pkgname ]; then
+    git clone --branch $_gittag $_giturl || return 1
+    cd $_pkgname
+  else
+    cd $_pkgname
+    git fetch || return 1
+  fi
+
+  git submodule init
+  git submodule update
+
+  ./build.sh
+  ./configure \
+  	--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr
+
+    make
+}
+
+check() {
+	cd "$builddir/BUILD"
+	make check || { find . -name 'test-suite.log' -exec cat '{}' ';'; return 1; }
+}
+
+package() {
+	cd "$builddir"
+	make -j1 AM_MAKEFLAGS= DESTDIR="$pkgdir" install
+}
+sha512sums="cc018ce8a480a622124edd5b1e8b52078c211cc24e6c1e499ef468ab6a886c4b3c08e2798b24a527fa61df3b5d0f8a1603e7bd62b4a8689e186c36d2eb41142d  libmodsecurity-3.0.3.tar.gz"

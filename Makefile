@@ -1,4 +1,5 @@
 VER := $(or ${ALPINE_VERSION},${ALPINE_VERSION},3.11)
+BUILDDIR := $(or ${BUILDDIR},${BUILDDIR},`pwd`)
 .RECIPEPREFIX +=
 .DEFAULT_GOAL := help
 STEPS := build run package clean sh upload public-key private-key generate-index
@@ -23,7 +24,7 @@ build: $(targets) ## Build necessary Docker image for building packages
   @touch .build.$(TARGET)
 
 run: build ## Run a command in a new Docker container; make run a=[...]
-  @docker run --rm -v `pwd`/build:/build -v `pwd`/public:/public dobrevit-abuild:v$(VER) $(a)
+  @docker run --rm -v $(BUILDDIR)/build:/build -v $(BUILDDIR)/public:/public dobrevit-abuild:v$(VER) $(a)
 
 package: ## Usage: make package [p="5.6|7.0|7.1|7.2|all|<package-name1> <package-name2> ..."]
   @test $(p)

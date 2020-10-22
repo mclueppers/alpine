@@ -31,5 +31,3 @@ bashcomp() {
 	mv "$subpkgdir"/usr/share/bash-completion/completions/$pkgname.bash-completion "$subpkgdir"/usr/share/bash-completion/completions/$pkgname
 }
 
-sha512sums="f14e2762bc57fd62589772d19f5a8fbbdcb0b5bb59e24ac94c63a0604b9e97b3124721cfa9bd3f54d5f514b7353eb79171369822e19ff38e6f90a8dc4c85d49b  vault-1.0.2.zip
-8bf604a920df3d42251d93e1289b9bb69103d1fb5adde396236e670d64483ecf5397675ed4d457c4b7d9fbcdfbf46821716d777d59577807cdaf47860384e5af  vault.bash-completion"

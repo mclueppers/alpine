@@ -31,5 +31,3 @@ bashcomp() {
 	mv "$subpkgdir"/usr/share/bash-completion/completions/$pkgname.bash-completion "$subpkgdir"/usr/share/bash-completion/completions/$pkgname
 }
 
-sha512sums="16fb199152d6228e4ed0eccfaaa66cfd5703b97571c71694bbec599b56505594471bb36e257a42155f94ec5cb16e637c8741df76db344836f244b69e5ac173ef  terraform-0.12.10.zip
-d245777665c8bb436fc511ee886153f798022c4f7c73d5fdc2b9dafd45c6d86db7b2fdd34083e36a6e48f93de79780d3275f5b078d78efdb4a28abef17dc4217  terraform.bash-completion"

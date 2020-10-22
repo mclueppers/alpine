@@ -120,6 +120,7 @@ php7.3-phpunit
 php7.3-pickle
 php7.3-redis
 php7.3-swoole
+php7.3-stats
 php7.3-xdebug
 php7.3-yaml
 "
@@ -139,6 +140,7 @@ php7.4-phpunit
 php7.4-pickle
 php7.4-redis
 php7.4-swoole
+php7.4-stats
 php7.4-xdebug
 php7.4-yaml
 "

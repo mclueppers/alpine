@@ -1,0 +1,19 @@
+# Maintainer: Martin Dobrev <martin@dobrev.it>
+
+pkgver=8
+pkgrel=100
+pkgname=clair-scanner
+pkgdesc="Run Clair scanner locally and scan Docker images for known vulnerabilities"
+url="https://github.com/arminc/$pkgname"
+arch="x86_64"
+license="Apache License 2.0"
+depends=""
+makedepends=""
+source="$pkgname::https://github.com/arminc/$pkgname/releases/download/v$pkgver/${pkgname}_linux_amd64"
+options="!check"
+
+package() {
+  install -m 0755 -D "$srcdir"/$pkgname "$pkgdir"/usr/bin/$pkgname
+}
+
+sha512sums="658f17c5a589ffdcb8e97143a0754414d55230ec67cd10396bee4bb30123b2aaaf8cec13f4dc50432ac2d57c86e8e80811e6a3b43d3513ac0a3e19cb9b15d471  clair-scanner"

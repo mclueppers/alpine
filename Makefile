@@ -1,9 +1,9 @@
-VER := $(or ${ALPINE_VERSION},${ALPINE_VERSION},3.11)
+VER := $(or ${ALPINE_VERSION},${ALPINE_VERSION},3.12)
 BUILDDIR := $(or ${BUILDDIR},${BUILDDIR},`pwd`)
 .RECIPEPREFIX +=
 .DEFAULT_GOAL := help
 STEPS := build run package clean sh upload public-key private-key generate-index
-ALPINE_VERSIONS := 3.7 3.8 3.9 3.10 3.11
+ALPINE_VERSIONS := 3.7 3.8 3.9 3.10 3.11 3.12
 
 targets = $(foreach ver,$(ALPINE_VERSIONS),.build.$(ver))
 
@@ -24,7 +24,7 @@ build: $(targets) ## Build necessary Docker image for building packages
   @touch .build.$(TARGET)
 
 run: build ## Run a command in a new Docker container; make run a=[...]
-  @docker run --rm -v $(BUILDDIR)/build:/build -v $(BUILDDIR)/public:/public dobrevit-abuild:v$(VER) $(a)
+  @docker run --rm -it -v $(BUILDDIR)/build:/build -v $(BUILDDIR)/public:/public dobrevit-abuild:v$(VER) $(a)
 
 package: ## Usage: make package [p="5.6|7.0|7.1|7.2|all|<package-name1> <package-name2> ..."]
   @test $(p)
@@ -40,10 +40,10 @@ public-key: ## Generate new public key
   make run a="openssl rsa -in dobrevit.rsa.priv -pubout -out /public/dobrevit.rsa.pub"
 
 clean: ## Remove pkg, src, tmp and log folders when building packages for Alpine
-  @rm -rf build/$(VER)/*/pkg build/$(VER)/*/src build/$(VER)/*/tmp log/* .build.*
+  rm -rf build/$(VER)/*/pkg build/$(VER)/*/src build/$(VER)/*/tmp log/* .build.*
 
 sh: ## Run shell
-  make run a=sh
+  make run a=/bin/sh
 
 upload: ARCH=$(shell docker run --rm dobrevit-abuild:v$(VER) apk --print-arch)
 upload: ## Upload build packages to Linux repos server

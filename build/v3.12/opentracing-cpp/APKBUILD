@@ -1,6 +1,6 @@
 # Maintainer: Martin Dobrev <martin@dobrev.it>
 pkgname=opentracing-cpp
-pkgver=1.6.0
+pkgver=1.5.1
 _pkgname=opentracing-cpp-$pkgver
 pkgrel=100
 pkgdesc="C++ implementation of the OpenTracing API"
@@ -38,4 +38,4 @@ package() {
 	cd "$builddir/.build"
 	make -j1 AM_MAKEFLAGS= DESTDIR="$pkgdir" install
 }
-sha512sums="e4efad670d5f09e7ce2e1cd4820c7efdd12d8ffbc2f9cbeb54427f640922aa547e12cf01ae0066f5b89304c7f592ab2c2612139bf3275b19773028f1d8c159b5  opentracing-cpp-1.6.0.tar.gz"
+sha512sums="d8dc1faf965fd05713bf16ebee669f9b36ca20de0ce04925aad452e9258f6d7fc51b373cd64cc1a76fbfa75ee17b71c7a76da284214223a6c3e41d37c0c57340  opentracing-cpp-1.5.1.tar.gz"

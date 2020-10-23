@@ -98,7 +98,6 @@ _extensions="
   curl
   dba
   dom
-  enchant
   exif
   fileinfo
   ftp
@@ -233,7 +232,6 @@ _build() {
       --with-dbmaker=shared \
       --with-gdbm \
     --enable-dom=shared \
-    --with-enchant=shared \
     --enable-exif=shared \
     --enable-fileinfo=shared \
     --enable-ftp=shared \
@@ -531,9 +529,9 @@ phar() {
   cd "$pkgdir"
 
   mkdir -p "$subpkgdir"/usr/bin
-  mv usr/bin/phar.phar "$subpkgdir"/usr/bin/phar.phar$_phpver
+  mv usr/bin/phar$_phpver "$subpkgdir"/usr/bin/phar.phar$_phpver
 
-  rm usr/bin/phar
+  #rm usr/bin/phar
   ln -s phar.phar$_phpver "$subpkgdir"/usr/bin/phar$_phpver
 }
 
@@ -617,7 +615,7 @@ _mv() {
 sha512sums="9bdd29a4a6c1ac55ed75d8fb2203ae5ef41992c518cb7e3b84cf74db62b03cfbe0ef4ea5614a684a37fcd2ae727376022ce49ed3ff32fc3a728e2f1e2474fb92  php-7.4.11.tar.xz
 0955b336f0847967dbc9760131bacc0238c8b5dc84c09902bae7b2ffa62a78a6d22fd95fb140286e7f8171da128ad9ff3f9e885607242573b75ad8a384353913  config.m4.patch
 d018570f6e0e240d8b1c61370c45a397137492cff292869338714abfde9f84c396687072a41154d06387ee92ff5f56f09d6e32d3dcb2642bae95bf63b5b9b05b  configure.patch
-557ec44927236224b06e9a022f039a9052240f5fd4ad57a35d9c1508c224b5717a3eacefc0e4ff0d4821ce0cdb5baee1a4fcede2c1c8b63edf46b60da9d0de64  disabled-tests.list
+d57b00e7794433a48147bdb833c0701f64c42d53328f2d7c9d6c616c99f09e0b229244d8dcc366e9a54520d2faac572e6a9d34a673e374f29ae61eb721833774  disabled-tests.list
 63f0a7e98e268497986233af353b05aec89c8a2d1e759a0e3f0f6fc83246232a1465ba8bd906ca17c0549dac25568e073361569a4d69f9603738e8cfcc50179a  iconv.c.patch
 1db7fd49b30a98ba24af068deb111d504ff3453c34239d9eb087e07966da4bf6914cf3d54c38bd60015167f05017a3a34fb38f1e06b00cf13a243650657a7fd1  install-pear.patch
 87a501249b8cd9ff6243c72e8f2991d5736267b734a245a5c56f71cdd07f5c8aeefa30e16e2ddc61db73561baffdc75aa774f9c49c83f61740963f283c29d775  pear.patch
@@ -625,4 +623,4 @@ d018570f6e0e240d8b1c61370c45a397137492cff292869338714abfde9f84c396687072a41154d0
 e42388c88eee24ac0f2a359ed3ac958851606712ecad6cd2a44005297e381fc7619dca4328ac5248a63056701b2d2386e6707444baac08a29aeedde913606c66  php-fpm.initd
 53e94cd2b3721d9c187bd96f3b205e5d8156c9bbc28228a455301b8f23709d710e31638f704a3eaa1b4211633b75f37731422e9169560cc0f8f75c2cb0c1fc68  php-fpm.logrotate
 274bd7b0b2b7002fa84c779640af37b59258bb37b05cb7dd5c89452977d71807f628d91b523b5039608376d1f760f3425d165242ca75ee5129b2730e71c4e198  php7-module.conf
-064db21b1073b5a03aaf547c773ebc096bcfa2bbb39f6c4e8ebff1002dbfa37e8ccb5712e21e0d9b300034f43c3501d13d75cefccb00473c844bb5449e7866dc  run-tests.php.patch"
+ed8670e7f29ed770f8a15ada14767fc93bfc863fbc161824e7a5622c98e0efc4439d9c559a92f3a6de05a028fff48d144b1d0e1c91191de73b26b1596f0762cc  run-tests.php.patch"

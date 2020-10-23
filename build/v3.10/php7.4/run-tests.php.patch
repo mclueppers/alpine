@@ -5,15 +5,15 @@ Remove messages like:
 
 from test outputs, because tests do not expect them.
 
---- a/run-tests.php
-+++ b/run-tests.php
-@@ -2005,6 +2005,9 @@
- 	// Does the output match what is expected?
- 	$output = preg_replace("/\r\n/", "\n", trim($out));
+--- a/run-tests.php 2020-10-23 17:52:11.921218721 +0100
++++ b/run-tests.php 2020-10-23 17:53:30.521489872 +0100
+@@ -2500,6 +2500,9 @@
+     // Does the output match what is expected?
+     $output = preg_replace("/\r\n/", "\n", trim($out));
  
-+	// Remove message from built-in development server.
-+	$output = preg_replace("/^PHP [0-9.]+ Development Server started at .*\n\n?/m", "", $output);
++    // Remove message from built-in development server.
++    $output = preg_replace("/^PHP [0-9.]+ Development Server started at .*\n\n?/m", "", $output);
 +
- 	/* when using CGI, strip the headers from the output */
- 	$headers = array();
+     /* when using CGI, strip the headers from the output */
+     $headers = array();
  

@@ -72,7 +72,7 @@ ext/pdo_odbc/tests/max_columns.phpt
 
 # Fails in chroot (on Travis).
 ext/posix/tests/posix_errno_variation2.phpt
-ext/posix/tests/posix_kill_basic.phpt
+#ext/posix/tests/posix_kill_basic.phpt
 
 # Randomly fails.
 ext/pcntl/tests/002.phpt
@@ -190,7 +190,7 @@ ext/sockets/tests/socket_strerror.phpt
 ext/standard/tests/file/disk_free_space_basic.phpt
 
 # Fails probably due to differencies in musl.
-ext/standard/tests/file/lstat_stat_variation9.phpt
+#ext/standard/tests/file/lstat_stat_variation9.phpt
 ext/standard/tests/file/popen_pclose_error.phpt
 
 # WTF?! getservername(true, "tcp") and similar non-senses...

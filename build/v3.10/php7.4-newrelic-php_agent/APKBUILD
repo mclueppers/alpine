@@ -44,4 +44,3 @@ package() {
   install -d "$pkgdir"/etc/php/$_phpver/conf.d
   sudo cp /etc/php/$_phpver/conf.d/newrelic.ini "$pkgdir/etc/php/$_phpver/conf.d/"
 }
-sha512sums="e48cc6a946e31d790ef139c46cb9a44aacbfdfbfd1f6bc0b8d0ae27ff67316993e28f25040413b04fa843cac9db39554e28d68dbdbe7f5bbf86d7c455d9f2824  newrelic-php5-9.6.0.255-linux-musl.tar.gz"

@@ -3,7 +3,7 @@
 pkgname=php7.3
 _pkgreal=php
 _phpver=7.3
-pkgver=7.3.12
+pkgver=7.3.23
 # Package release number is started at 100 so it overwrites the official package
 pkgrel=100
 _apiver=20180731
@@ -32,7 +32,6 @@ makedepends="
   coreutils
   curl-dev
   db-dev
-  enchant-dev
   file
   freetds-dev
   freetype-dev
@@ -97,7 +96,6 @@ _extensions="
   curl
   dba
   dom
-  enchant
   exif
   fileinfo
   ftp
@@ -225,6 +223,7 @@ _build() {
     --with-pear=/usr/share/php/$_phpver \
     --disable-short-tags \
     --enable-bcmath=shared \
+    --enable-exif=shared \
     --with-bz2=shared \
     --enable-calendar=shared \
     --enable-ctype=shared \
@@ -234,8 +233,6 @@ _build() {
       --with-dbmaker=shared \
       --with-gdbm \
     --enable-dom=shared \
-    --with-enchant=shared \
-    --enable-exif=shared \
     --enable-fileinfo=shared \
     --enable-ftp=shared \
     --with-gd=shared,/usr \
@@ -620,7 +617,7 @@ _mv() {
   mkdir -p "$dest"
   mv $@
 }
-sha512sums="e3022da2c9c216793c9f44d530a7217f51fd1d99a3dfb203eecc4a149fd29ab31facccfc2fb67af8241c9a83d3543020fcfce403dfc12142b03fa7458d600be3  php-7.3.12.tar.xz
+sha512sums="b5e318bd59951b470a22b2ef2db19cd542d42bed72cf4abe4344c0521eeba606eac31a38ff49d2ab0cb7ed17441655e029d5984584d86b935f576515179777af  php-7.3.23.tar.xz
 1ff2a0a98fadd90b32dd1f8e94b4102ff6b713ee3e6687821b063ff2a7eabea42b963bc88db5668a1dfd7269e62b65f96a1530c3da16992840fc92686a7aa4f4  allow-build-recode-and-imap-together.patch
 0955b336f0847967dbc9760131bacc0238c8b5dc84c09902bae7b2ffa62a78a6d22fd95fb140286e7f8171da128ad9ff3f9e885607242573b75ad8a384353913  config.m4.patch
 d018570f6e0e240d8b1c61370c45a397137492cff292869338714abfde9f84c396687072a41154d06387ee92ff5f56f09d6e32d3dcb2642bae95bf63b5b9b05b  configure.patch

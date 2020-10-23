@@ -1,0 +1,40 @@
+# Maintainer: Martin Dobrev <martin@dobrev.it>
+pkgname=dd-opentracing-cpp
+pkgver=1.2.0
+_pkgname=dd-opentracing-cpp-$pkgver
+pkgrel=100
+pkgdesc="Datadog OpenTracing C++ Client"
+url="http://datadog.com"
+arch="all"
+license="Apache License 2.0"
+options="!check" # tests are broken
+depends=""
+depends_dev=""
+makedepends="$depends_dev build-base cmake make opentracing-cpp-dev pcre-dev curl-dev msgpack-c-dev musl-dev"
+install=""
+subpackages="$pkgname-dev"
+source="$pkgname-$pkgver.tar.gz::https://github.com/DataDog/dd-opentracing-cpp/archive/v$pkgver.tar.gz"
+builddir="$srcdir/$_pkgname"
+
+build() {
+  mkdir -p $builddir/.build
+  cd $builddir/.build
+  cmake -DCMAKE_INSTALL_PREFIX="/usr" \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_CXX_FLAGS="-fPIC" \
+        -DBUILD_TESTING=OFF \
+        -DBUILD_PLUGIN=ON \
+        ..
+  make
+}
+
+check() {
+	cd $builddir/.build
+  make test
+}
+
+package() {
+	cd "$builddir/.build"
+	make -j1 AM_MAKEFLAGS= DESTDIR="$pkgdir" install
+}
+sha512sums="c9eb852deedc0290c1c2f5ff6ad4be17c6e463cbd716479c7cb39358b197029cb80db0d3660fb675f1d8568b5e83e0875c14bb568a37cf9dc7c23204571ecd7f  dd-opentracing-cpp-1.2.0.tar.gz"

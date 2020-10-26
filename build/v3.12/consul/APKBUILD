@@ -28,4 +28,4 @@ source="$pkgname-$pkgver.zip::https://releases.hashicorp.com/$pkgname/$pkgver/${
 package() {
   install -m 0755 -D "$srcdir"/$pkgname "$pkgdir"/usr/bin/$pkgname
 }
-sha512sums="220b0af8e439d2fe3fc7e1ca07bdbda1f3ee5b2fa889983c04e7004d99ade5ece005b45e1288bfcbe2bf847f23d35684845bd6edbf59fe4220be8e9e83f05439  consul-1.8.4.zip"
+sha512sums="9461cca16edd19ff2979e5b18e82cc974ecc008db469f350bc158afa2671b8dd798e1ccc5cccf811a286a16d11565e621340604f374ca3ef763be0d07e6b1f53  consul-1.8.4.zip"

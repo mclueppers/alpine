@@ -1,13 +1,15 @@
 VER := $(or ${ALPINE_VERSION},${ALPINE_VERSION},3.12)
+PLATFORM := $(or ${PLATFORM},${PLATFORM},linux/amd64)
+PLATFORM_SLUG := $(shell echo ${PLATFORM} | sed -e 's/\//-/g')
 BUILDDIR := $(or ${BUILDDIR},${BUILDDIR},`pwd`)
 .RECIPEPREFIX +=
 .DEFAULT_GOAL := help
 STEPS := build run package clean sh upload public-key private-key generate-index
 ALPINE_VERSIONS := 3.7 3.8 3.9 3.10 3.11 3.12
 
-targets = $(foreach ver,$(ALPINE_VERSIONS),.build.$(ver))
+targets = $(foreach ver,$(ALPINE_VERSIONS),.build.$(PLATFORM_SLUG).$(ver))
 
-$(ALPINE_VERSIONS): %: .build.%:
+$(ALPINE_VERSIONS): %: .build.$(PLATFORM_SLUG).%:
 
 .PHONY: $(STEPS) $(ALPINE_VERSIONS)
 
@@ -17,14 +19,14 @@ help:
 
 build: $(targets) ## Build necessary Docker image for building packages
 
-.build.%: TARGET=$(shell echo $* | sed -e 's/\://g')
-.build.%:
-  @echo '> Creating Alpine $(TARGET) abuild container'
-  @docker image build --build-arg IMAGE_TAG=$(TARGET) -t dobrevit-abuild:v$(TARGET)  -f .docker/abuild/Dockerfile .docker/abuild
-  @touch .build.$(TARGET)
+.build.$(PLATFORM_SLUG).%: TARGET=$(shell echo $* | sed -e 's/\://g')
+.build.$(PLATFORM_SLUG).%:
+  @echo '> Creating Alpine $(TARGET) abuild container for $(PLATFORM)'
+  @docker image build --platform $(PLATFORM) --build-arg IMAGE_TAG=$(TARGET) -t dobrevit-abuild:v$(TARGET)-$(PLATFORM_SLUG)  -f .docker/abuild/Dockerfile .docker/abuild
+  @touch .build.$(PLATFORM_SLUG).$(TARGET)
 
 run: build ## Run a command in a new Docker container; make run a=[...]
-  @docker run --rm -it -v $(BUILDDIR)/build:/build -v $(BUILDDIR)/public:/public dobrevit-abuild:v$(VER) $(a)
+  @docker run --rm -it --platform $(PLATFORM) -v $(BUILDDIR)/build:/build -v $(BUILDDIR)/public:/public dobrevit-abuild:v$(VER)-$(PLATFORM_SLUG) $(a)
 
 package: ## Usage: make package [p="5.6|7.0|7.1|7.2|all|<package-name1> <package-name2> ..."]
   @test $(p)
@@ -45,6 +47,6 @@ clean: ## Remove pkg, src, tmp and log folders when building packages for Alpine
 sh: ## Run shell
   make run a=/bin/sh
 
-upload: ARCH=$(shell docker run --rm dobrevit-abuild:v$(VER) apk --print-arch)
+upload: ARCH=$(shell docker run --rm --platform $(PLATFORM) dobrevit-abuild:v$(VER)-$(PLATFORM_SLUG) apk --print-arch)
 upload: ## Upload build packages to Linux repos server
   @rsync -avz --del public/v$(VER)/$(ARCH) root@repos.dobrev.it:/var/www/html/alpine/v$(VER)/

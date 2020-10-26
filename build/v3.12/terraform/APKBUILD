@@ -1,15 +1,28 @@
 # Maintainer: Martin Dobrev <martin@dobrev.it>
 
-pkgver=0.12.10
+pkgver=0.13.4
 pkgrel=0
 pkgname=terraform
 pkgdesc="Write, Plan, and Create Infrastructure as Code"
 url="https://www.terraform.io/"
-arch="x86_64"
+arch="x86_64 arm64 aarch64 armhf"
 license="Mozilla Public License 2.0"
 depends=""
 makedepends="zip"
-source="$pkgname-$pkgver.zip::https://releases.hashicorp.com/$pkgname/$pkgver/${pkgname}_${pkgver}_linux_amd64.zip
+
+_get_arch() {
+  local _arch
+  case "$CARCH" in
+    aarch64*)  _arch="arm64" ;;
+    armhf*)    _arch="armhfv6" ;;
+    x86)       _arch="386" ;;
+    x86_64)    _arch="amd64" ;;
+    *)         echo "Unable to determine architecture from (CARCH=$CARCH)" ; return 1 ;;
+  esac
+  echo $_arch
+}
+
+source="$pkgname-$pkgver.zip::https://releases.hashicorp.com/$pkgname/$pkgver/${pkgname}_${pkgver}_linux_$(_get_arch).zip
 $pkgname.bash-completion::https://raw.githubusercontent.com/Bash-it/bash-it/master/completion/available/$pkgname.completion.bash"
 subpackages="$pkgname-bash-completion:bashcomp"
 options="!check"
@@ -31,5 +44,5 @@ bashcomp() {
 	mv "$subpkgdir"/usr/share/bash-completion/completions/$pkgname.bash-completion "$subpkgdir"/usr/share/bash-completion/completions/$pkgname
 }
 
-sha512sums="16fb199152d6228e4ed0eccfaaa66cfd5703b97571c71694bbec599b56505594471bb36e257a42155f94ec5cb16e637c8741df76db344836f244b69e5ac173ef  terraform-0.12.10.zip
+sha512sums="8e16a9df48934f46e02a22e7b55997dff0f73c614ee7d27ace636843dd712c3e2e67fd7710cd5594423d7df88c3a266b9578f25554b5ec1bef08337cd78abfea  terraform-0.13.4.zip
 42a86e620dc91ce93a4d7dcc8fa42a3d3afd493e18e553101fc715f9e860a37c6b13f349de9c906314e04b1bfe35f3d3993c5f178b8fb52cbaab4a56246bd4a7  terraform.bash-completion"

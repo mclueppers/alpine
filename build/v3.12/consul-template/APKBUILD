@@ -9,7 +9,20 @@ arch="x86_64"
 license="Mozilla Public License 2.0"
 depends=""
 makedepends="zip"
-source="$pkgname-$pkgver.zip::https://releases.hashicorp.com/$pkgname/$pkgver/${pkgname}_${pkgver}_linux_amd64.zip"
+
+_get_arch() {
+  local _arch
+  case "$CARCH" in
+    aarch64*)  _arch="arm64" ;;
+    armhf*)    _arch="armhfv6" ;;
+    x86)       _arch="386" ;;
+    x86_64)    _arch="amd64" ;;
+    *)         echo "Unable to determine architecture from (CARCH=$CARCH)" ; return 1 ;;
+  esac
+  echo $_arch
+}
+
+source="$pkgname-$pkgver.zip::https://releases.hashicorp.com/$pkgname/$pkgver/${pkgname}_${pkgver}_linux_$(_get_arch).zip"
 options="!check"
 
 package() {

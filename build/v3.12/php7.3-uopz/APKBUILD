@@ -1,6 +1,6 @@
 # Maintainer: Martin Dobrev <martin@dobrev.eu>
 
-pkgver=6.1.1
+pkgver=6.1.2
 pkgrel=100
 _phpver=7.3
 _php=php$_phpver
@@ -57,4 +57,4 @@ package() {
   install -d "$pkgdir"/etc/php/$_phpver/conf.d
   echo "extension=$_pkgreal.so" > "$pkgdir"/etc/php/$_phpver/conf.d/$_pkgreal.ini
 }
-sha512sums="8230936a6392083bcdf6851d31fcb57f50e1a6cf81384245f4e66ce7abc8039cc5a24018abb095c2aae3ad5b52731a465e9810d8fc1a174cd7bfb76e48eb3485  uopz-6.1.1.tgz"
+sha512sums="86062f2bbc7f684b9f2e9dc3bf3b1f095fa7dfd47de725bcf84b419bb4815c71fd3fae398b433c17b1d0ea5ab710ecdf695cbe27f7eb806dae3aab57706b98f9  uopz-6.1.2.tgz"

@@ -3,7 +3,7 @@
 pkgname=php7.3
 _pkgreal=php
 _phpver=7.3
-pkgver=7.3.23
+pkgver=7.3.24
 # Package release number is started at 100 so it overwrites the official package
 pkgrel=100
 _apiver=20180731
@@ -474,9 +474,9 @@ fpm() {
   done
 
   # Fix FPM versions in configuration files
-  sed -i 's/\;pid \= run\/php-fpm\.pid/pid \= \/run\/php\/php-fpm7\.2\.pid/g' "$subpkgdir"/etc/php/$_phpver/php-fpm.conf
-  sed -i 's/\;error\_log \= log\/php-fpm\.log/error\_log \= \/var\/log\/php\/7\.2\/php-fpm\.log/g' "$subpkgdir"/etc/php/$_phpver/php-fpm.conf
-  sed -i 's/listen \= 127\.0\.0\.1\:9000/listen \= \/run\/php\/php-fpm7\.2\.sock/g' "$subpkgdir"/etc/php/$_phpver/php-fpm.d/www.conf
+  sed -i 's/\;pid \= run\/php-fpm\.pid/pid \= \/run\/php\/php-fpm7\.3\.pid/g' "$subpkgdir"/etc/php/$_phpver/php-fpm.conf
+  sed -i 's/\;error\_log \= log\/php-fpm\.log/error\_log \= \/var\/log\/php\/7\.3\/php-fpm\.log/g' "$subpkgdir"/etc/php/$_phpver/php-fpm.conf
+  sed -i 's/listen \= 127\.0\.0\.1\:9000/listen \= \/run\/php\/php-fpm7\.3\.sock/g' "$subpkgdir"/etc/php/$_phpver/php-fpm.d/www.conf
   sed -i 's/\;listen\.owner \= www-data/listen\.owner \= www-data/g' "$subpkgdir"/etc/php/$_phpver/php-fpm.d/www.conf
   sed -i 's/\;listen\.group \= www-data/listen\.group \= www-data/g' "$subpkgdir"/etc/php/$_phpver/php-fpm.d/www.conf
 
@@ -520,7 +520,7 @@ common() {
   _mv "$pkgdir"/usr/lib "$subpkgdir"/usr/
   rm -rf "$pkgdir"/etc/
   install -Dm644 "$builddir"/php.ini-production "$subpkgdir"/etc/php/$_phpver/php.ini
-  mkdir -p "$subpkgdir"/$_extension_confd
+  mkdir -pm755 "$subpkgdir"/$_extension_confd
   install -Dm644 "$builddir"/php.ini-development "$subpkgdir"/etc/php/$_phpver/php.ini-development
   install -Dm644 "$builddir"/php.ini-production "$subpkgdir"/etc/php/$_phpver/php.ini-production
 }
@@ -560,7 +560,7 @@ _extension() {
   _mv "$pkgdir"/$_extension_dir/$extname.so \
     "$subpkgdir"/$_extension_dir/
 
-  mkdir -p "$subpkgdir"/$_extension_confd
+  mkdir -pm755 "$subpkgdir"/$_extension_confd
   echo "${prefix}extension=$extname" \
     > "$subpkgdir"/$_extension_confd/$(printf %02d $load_order)_$extname.ini
 }
@@ -614,7 +614,7 @@ _extensions_by_load_order() {
 # Move source to destination folder and creating destination folder if missing
 _mv() {
   local dest; for dest; do true; done  # get last argument
-  mkdir -p "$dest"
+  mkdir -pm755 "$dest"
   mv $@
 }
 sha512sums="b5e318bd59951b470a22b2ef2db19cd542d42bed72cf4abe4344c0521eeba606eac31a38ff49d2ab0cb7ed17441655e029d5984584d86b935f576515179777af  php-7.3.23.tar.xz

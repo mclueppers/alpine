@@ -1,0 +1,63 @@
+Taken from Alpine Community
+
+diff --git a/ext/enchant/config.m4 b/ext/enchant/config.m4
+index 81b77c9b..0fa74f29 100755
+--- a/ext/enchant/config.m4
++++ b/ext/enchant/config.m4
+@@ -4,14 +4,14 @@
+     [Include Enchant support])])
+
+ if test "$PHP_ENCHANT" != "no"; then
+-  PKG_CHECK_MODULES([ENCHANT], [enchant])
++  PKG_CHECK_MODULES([ENCHANT], [enchant-2])
+
+   PHP_EVAL_INCLINE($ENCHANT_CFLAGS)
+   PHP_EVAL_LIBLINE($ENCHANT_LIBS, ENCHANT_SHARED_LIBADD)
+
+   AC_DEFINE(HAVE_ENCHANT, 1, [ ])
+
+-  PHP_CHECK_LIBRARY(enchant, enchant_get_version,
++  PHP_CHECK_LIBRARY(enchant-2, enchant_get_version,
+   [
+     AC_DEFINE(HAVE_ENCHANT_GET_VERSION, 1, [ ])
+   ], [ ], [
+diff --git a/ext/enchant/enchant.c b/ext/enchant/enchant.c
+index 063b419b..13ff8024 100644
+--- a/ext/enchant/enchant.c
++++ b/ext/enchant/enchant.c
+@@ -738,7 +738,7 @@ PHP_FUNCTION(enchant_dict_quick_check)
+ 			for (i = 0; i < n_sugg; i++) {
+ 				add_next_index_string(sugg, suggs[i]);
+ 			}
+-			enchant_dict_free_suggestions(pdict->pdict, suggs);
++			enchant_dict_free_string_list(pdict->pdict, suggs);
+ 		}
+ 
+ 
+@@ -795,7 +795,7 @@ PHP_FUNCTION(enchant_dict_suggest)
+ 			add_next_index_string(return_value, suggs[i]);
+ 		}
+ 
+-		enchant_dict_free_suggestions(pdict->pdict, suggs);
++		enchant_dict_free_string_list(pdict->pdict, suggs);
+ 	}
+ }
+ /* }}} */
+@@ -815,7 +815,7 @@ PHP_FUNCTION(enchant_dict_add_to_personal)
+ 
+ 	PHP_ENCHANT_GET_DICT;
+ 
+-	enchant_dict_add_to_personal(pdict->pdict, word, wordlen);
++	enchant_dict_add(pdict->pdict, word, wordlen);
+ }
+ /* }}} */
+ 
+@@ -853,7 +853,7 @@ PHP_FUNCTION(enchant_dict_is_in_session)
+ 
+ 	PHP_ENCHANT_GET_DICT;
+ 
+-	RETURN_BOOL(enchant_dict_is_in_session(pdict->pdict, word, wordlen));
++	RETURN_BOOL(enchant_dict_is_added(pdict->pdict, word, wordlen));
+ }
+ /* }}} */
+ 

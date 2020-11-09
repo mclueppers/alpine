@@ -3,7 +3,7 @@
 pkgname=php7.4
 _pkgreal=php
 _phpver=7.4
-pkgver=7.4.11
+pkgver=7.4.12
 # Package release number is started at 100 so it overwrites the official package
 pkgrel=100
 _apiver=20190902
@@ -32,6 +32,7 @@ makedepends="
   coreutils
   curl-dev
   db-dev
+  enchant2-dev
   file
   freetds-dev
   freetype-dev
@@ -45,6 +46,7 @@ makedepends="
   krb5-dev
   libedit-dev
   libgcrypt-dev
+  libgd
   libgpg-error-dev
   libical-dev
   libjpeg-turbo-dev
@@ -63,6 +65,7 @@ makedepends="
   pcre2-dev
   postgresql-dev
   re2c
+  readline-dev
   recode-dev
   sqlite-dev
   tidyhtml-dev
@@ -74,6 +77,7 @@ source="http://php.net/distributions/$_pkgreal-$pkgver.tar.xz
   config.m4.patch
   configure.patch
   disabled-tests.list
+  enchant-2.patch
   iconv.c.patch
   install-pear.patch
   pear.patch
@@ -98,6 +102,7 @@ _extensions="
   curl
   dba
   dom
+  enchant
   exif
   fileinfo
   ftp
@@ -232,6 +237,7 @@ _build() {
       --with-dbmaker=shared \
       --with-gdbm \
     --enable-dom=shared \
+    --with-enchant=shared \
     --enable-exif=shared \
     --enable-fileinfo=shared \
     --enable-ftp=shared \
@@ -241,6 +247,7 @@ _build() {
       --with-jpeg \
       --with-webp \
       --with-xpm \
+      --with-external-gd \
     --with-gettext=shared \
     --with-gmp=shared \
     --with-iconv=shared \
@@ -275,7 +282,7 @@ _build() {
     --enable-phar=shared \
     --enable-posix=shared \
     --with-pspell=shared \
-    --without-readline \
+    --with-readline=shared \
     --enable-session=shared \
     --enable-shmop=shared \
     --enable-simplexml=shared \
@@ -298,11 +305,6 @@ _build() {
     --with-xsl=shared \
     --with-zip=shared \
     --with-zlib=shared \
-    --enable-phpdbg \
-    --enable-phpdbg-webhelper \
-    --enable-fpm \
-    --with-fpm-user=www-data \
-    --with-fpm-group=www-data \
     $@
 
   make -j$jobs
@@ -319,11 +321,27 @@ build() {
   # cli, cgi, phpdbg, fpm, apache, litespeed
   # https://bugs.php.net/bug.php?id=75250
   install -Dm644 /etc/apache2/httpd.conf $_tmpdir/etc/apache2/httpd.conf
-  _build --with-apxs2 \
-         --with-litespeed \
 
-  # embed
-  _build --enable-embed
+  # phpdbg
+	_build --enable-phpdbg \
+		--enable-phpdbg-webhelper \
+		--disable-cgi \
+		--disable-cli
+
+	# apache2 module
+	_build --disable-phpdbg \
+		--disable-cgi \
+		--disable-cli \
+		--with-apxs2
+	#mv libs/libphp$_suffix.so sapi/apache2handler/mod_php$_suffix.so
+
+	# cgi, cli, fpm, embed, litespeed
+	_build --disable-phpdbg \
+		--enable-fpm \
+    --with-fpm-user=www-data \
+    --with-fpm-group=www-data \
+		--enable-embed \
+		--with-litespeed
 }
 
 check() {
@@ -515,7 +533,7 @@ common() {
   _mv "$pkgdir"/usr/lib "$subpkgdir"/usr/
   rm -rf "$pkgdir"/etc/
   install -Dm644 "$builddir"/php.ini-production "$subpkgdir"/etc/php/$_phpver/php.ini
-  mkdir -p "$subpkgdir"/$_extension_confd
+  mkdir -pm755 "$subpkgdir"/$_extension_confd
   install -Dm644 "$builddir"/php.ini-development "$subpkgdir"/etc/php/$_phpver/php.ini-development
   install -Dm644 "$builddir"/php.ini-production "$subpkgdir"/etc/php/$_phpver/php.ini-production
 }
@@ -555,7 +573,7 @@ _extension() {
   _mv "$pkgdir"/$_extension_dir/$extname.so \
     "$subpkgdir"/$_extension_dir/
 
-  mkdir -p "$subpkgdir"/$_extension_confd
+  mkdir -pm755 "$subpkgdir"/$_extension_confd
   echo "${prefix}extension=$extname" \
     > "$subpkgdir"/$_extension_confd/$(printf %02d $load_order)_$extname.ini
 }
@@ -609,13 +627,14 @@ _extensions_by_load_order() {
 # Move source to destination folder and creating destination folder if missing
 _mv() {
   local dest; for dest; do true; done  # get last argument
-  mkdir -p "$dest"
+  mkdir -pm755 "$dest"
   mv $@
 }
-sha512sums="9bdd29a4a6c1ac55ed75d8fb2203ae5ef41992c518cb7e3b84cf74db62b03cfbe0ef4ea5614a684a37fcd2ae727376022ce49ed3ff32fc3a728e2f1e2474fb92  php-7.4.11.tar.xz
+sha512sums="6c06fb74f8e479ead000b0e2e56602c217d012f1a80e47e151543c033bb5426e56aaa5e8acfcd19fd49ae14c4ca827c8e57a5b56386b20002dbc80fbd07ab04f  php-7.4.12.tar.xz
 0955b336f0847967dbc9760131bacc0238c8b5dc84c09902bae7b2ffa62a78a6d22fd95fb140286e7f8171da128ad9ff3f9e885607242573b75ad8a384353913  config.m4.patch
 d018570f6e0e240d8b1c61370c45a397137492cff292869338714abfde9f84c396687072a41154d06387ee92ff5f56f09d6e32d3dcb2642bae95bf63b5b9b05b  configure.patch
 d57b00e7794433a48147bdb833c0701f64c42d53328f2d7c9d6c616c99f09e0b229244d8dcc366e9a54520d2faac572e6a9d34a673e374f29ae61eb721833774  disabled-tests.list
+cd922bd25931d6afe37526ac4f5f8db30e241b53c3a1c74ca8c9026052f2a6d7c3c535a616fcf5a1056f9288d533896e7ae32dfe8caf4cfb77eaea69add5ddae  enchant-2.patch
 63f0a7e98e268497986233af353b05aec89c8a2d1e759a0e3f0f6fc83246232a1465ba8bd906ca17c0549dac25568e073361569a4d69f9603738e8cfcc50179a  iconv.c.patch
 1db7fd49b30a98ba24af068deb111d504ff3453c34239d9eb087e07966da4bf6914cf3d54c38bd60015167f05017a3a34fb38f1e06b00cf13a243650657a7fd1  install-pear.patch
 87a501249b8cd9ff6243c72e8f2991d5736267b734a245a5c56f71cdd07f5c8aeefa30e16e2ddc61db73561baffdc75aa774f9c49c83f61740963f283c29d775  pear.patch

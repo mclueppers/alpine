@@ -1,6 +1,6 @@
 # Maintainer: Martin Dobrev <martin@dobrev.it>
 
-pkgver=9.6.0.255
+pkgver=9.13.0.270
 # Package release number is started at 100 so it overwrites the official package
 pkgrel=100
 _phpver=7.4

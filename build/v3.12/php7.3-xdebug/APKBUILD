@@ -1,12 +1,12 @@
 # Maintainer: Peter Kokot <peterkokot@gmail.com>
 
-pkgver=2.7.2
+pkgver=2.9.8
 # Package release number is started at 100 so it overwrites the official package
 pkgrel=104
 _phpver=7.3
 _php=php$_phpver
 _pkgreal=xdebug
-_pkgver=2.7.2
+_pkgver=2.9.8
 pkgname=$_php-$_pkgreal
 pkgdesc="PHP $_phpver xDebug Profiler"
 url="http://pecl.php.net/package/$_pkgreal"
@@ -59,4 +59,4 @@ package() {
   install -d "$pkgdir"/etc/php/$_phpver/conf.d
   echo "zend_extension=$_pkgreal" > "$pkgdir"/etc/php/$_phpver/conf.d/$_pkgreal.ini
 }
-sha512sums="faeffb6b1bccb9fec8e589288ac5025b18cb4ee8b637c7d9e71bfd1167b36381e438af72c9b6f71658c92dabb79629e38047972a00719166d66ca34cfb5095c2  xdebug-2.7.2.tgz"
+sha512sums="5655ba46f8ff312a6ea71737537e3bc230fb4a737162e02e3703d907c90f0508bd31584e640c1e0ae443f7672bce566d6125c01bd5a44585d021a899b3b2b19e  xdebug-2.9.8.tgz"

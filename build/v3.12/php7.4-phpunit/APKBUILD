@@ -34,5 +34,5 @@ check () {
 
 package() {
   mkdir -p "$pkgdir/usr/sbin/"
-  sudo cp "$builddir/phpunit$_phpver" "$pkgdir/usr/sbin/"
+  cp "$builddir/phpunit$_phpver" "$pkgdir/usr/sbin/"
 }

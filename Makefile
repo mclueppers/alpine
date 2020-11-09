@@ -1,11 +1,11 @@
 VER := $(or ${ALPINE_VERSION},${ALPINE_VERSION},3.12)
-PLATFORM := $(or ${PLATFORM},${PLATFORM},linux/arm64)
+PLATFORM := $(or ${PLATFORM},${PLATFORM},linux/amd64)
 PLATFORM_SLUG := $(shell echo $(PLATFORM) | sed -e 's/\//-/g')
 BUILDDIR := $(or ${BUILDDIR},${BUILDDIR},`pwd`)
 .RECIPEPREFIX +=
 .DEFAULT_GOAL := help
 STEPS := build run package clean sh upload public-key private-key generate-index
-ALPINE_VERSIONS := 3.7 3.8 3.9 3.10 3.11 3.12
+ALPINE_VERSIONS := 3.10 3.11 3.12
 
 targets = $(foreach ver,$(ALPINE_VERSIONS),.build.$(ver)-$(PLATFORM_SLUG))
 

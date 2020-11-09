@@ -5,6 +5,8 @@ ARG IMAGE_TAG=3.7
 ENV GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 ENV IMAGE_TAG=$IMAGE_TAG
 
+COPY . /
+
 RUN apk add --no-cache alpine-sdk sudo \
     && adduser -D -g '' -u 1000 -G abuild packager \
     && echo "packager ALL=(ALL) ALL" >> /etc/sudoers \
@@ -12,7 +14,9 @@ RUN apk add --no-cache alpine-sdk sudo \
     && echo "/public/v${IMAGE_TAG}" | tee -a /etc/apk/repositories \
     && mkdir -p /home/packager/.abuild \
     && ln -s /build/dobrevit.rsa.priv /home/packager/.abuild/dobrevit.rsa.priv \
-    && chown packager. /home/packager/.abuild \
+    && chmod 775 /home/packager \
+    && chown packager:abuild /home/packager \
+    && chown packager:abuild /home/packager/.abuild \
     && ln -s /public/dobrevit.rsa.pub /etc/apk/keys/dobrevit.rsa.pub \
     # For building some packages (litespeeed and pear) the php command is used
     # and we'll use the latest development php.ini files to show possible warnings
@@ -24,8 +28,6 @@ RUN apk add --no-cache alpine-sdk sudo \
     && curl https://raw.githubusercontent.com/php/php-src/PHP-7.2/php.ini-development --output /etc/php/7.2/php.ini \
     && curl https://raw.githubusercontent.com/php/php-src/PHP-7.3/php.ini-development --output /etc/php/7.3/php.ini \
     && curl https://raw.githubusercontent.com/php/php-src/PHP-7.4/php.ini-development --output /etc/php/7.4/php.ini
-
-COPY . /
 
 USER packager
 

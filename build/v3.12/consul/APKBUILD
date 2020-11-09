@@ -1,18 +1,31 @@
 # Maintainer: Martin Dobrev <martin@dobrev.it>
 
-pkgver=1.4.3
+pkgver=1.8.4
 pkgrel=0
 pkgname=consul
 pkgdesc="Service Discovery and Configuration Made Easy"
 url="https://www.consul.io/"
-arch="x86_64"
+arch="x86_64 arm64 aarch64 armhf"
 license="Mozilla Public License 2.0"
 depends=""
 makedepends="zip"
-source="$pkgname-$pkgver.zip::https://releases.hashicorp.com/$pkgname/$pkgver/${pkgname}_${pkgver}_linux_amd64.zip"
 options="!check"
+
+_get_arch() {
+  local _arch
+  case "$CARCH" in
+    aarch64*)  _arch="arm64" ;;
+    armhf*)    _arch="armhfv6" ;;
+    x86)       _arch="386" ;;
+    x86_64)    _arch="amd64" ;;
+    *)         echo "Unable to determine architecture from (CARCH=$CARCH)" ; return 1 ;;
+  esac
+  echo $_arch
+}
+
+source="$pkgname-$pkgver.zip::https://releases.hashicorp.com/$pkgname/$pkgver/${pkgname}_${pkgver}_linux_$(_get_arch).zip"
 
 package() {
   install -m 0755 -D "$srcdir"/$pkgname "$pkgdir"/usr/bin/$pkgname
 }
-sha512sums="8d22e6e648f4f5720fabd244bded523d42200099febb0927f8c34007a2550048dec9c6c71ccb8f9f9c5dfe7d892226a3da82749b195986433f2b98ffbe64614e  consul-1.4.3.zip"
+sha512sums="9461cca16edd19ff2979e5b18e82cc974ecc008db469f350bc158afa2671b8dd798e1ccc5cccf811a286a16d11565e621340604f374ca3ef763be0d07e6b1f53  consul-1.8.4.zip"

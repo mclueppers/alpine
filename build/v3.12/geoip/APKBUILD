@@ -1,0 +1,42 @@
+# Maintainer: Leonardo Arena <rnalrd@alpinelinux.org>
+# https://git.alpinelinux.org/aports/tree/main/geoip/APKBUILD
+pkgname="geoip"
+_pkgname="GeoIP"
+pkgver=1.6.12
+pkgrel=1
+pkgdesc="Lookup countries by IP addresses"
+url="http://www.maxmind.com/app/ip-location"
+arch="all"
+license="GPL"
+makedepends="zlib-dev"
+subpackages="$pkgname-dev $pkgname-doc"
+source="https://github.com/maxmind/geoip-api-c/releases/download/v$pkgver/$_pkgname-$pkgver.tar.gz
+	geoip.cron"
+builddir="$srcdir"/$_pkgname-$pkgver
+
+build() {
+	cd "$builddir"
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--sysconfdir=/etc/geoip \
+		--mandir=/usr/share/man \
+		--infodir=/usr/share/info
+	make
+}
+
+package() {
+	cd "$builddir"
+	make DESTDIR="$pkgdir" install
+	mkdir -p "$pkgdir"/usr/share/GeoIP
+	install -m755 -D ../../geoip.cron "$pkgdir"/etc/periodic/monthly/geoip
+}
+
+check() {
+	cd "$builddir"
+	make check
+}
+
+sha512sums="a1c8120692a7ba6de5836550917f86f4797dd236a8b7d71b6f92b5389e4b071d89e57036654f5de1d4b762730a2a5c331c31414eab0c889c9befaa097941fee7  GeoIP-1.6.12.tar.gz
+60348c58d156bdc626c362cb425c6c1efa0cef00783f0ede8a26d72fa81421f2e64062443829424497946bb75f868dc19b4bb910ea261a26459dea41651cf58e  geoip.cron"

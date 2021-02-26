@@ -1,0 +1,174 @@
+# Contributor: Yichun Zhang <admin@openresty.com>
+# Maintainer: Yichun Zhang <admin@openresty.com>
+pkgname="openresty"
+pkgver="1.19.3.1"
+pkgrel=0
+pkgdesc="OpenResty, scalable web platform by extending NGINX with Lua"
+url="https://openresty.org/"
+arch="all"
+license="BSD"
+depends="openresty-openssl111>=1.1.1g-r0 openresty-pcre openresty-zlib libgcc"
+makedepends="ccache perl openresty-openssl111-dev>=1.1.1g-r0 openresty-pcre-dev openresty-zlib-dev"
+install="$pkgname.pre-install $pkgname.post-install"
+subpackages="
+    $pkgname-static $pkgname-restydoc:restydoc:noarch $pkgname-dbg
+    $pkgname-resty:resty:noarch $pkgname-opm:opm:noarch
+    "
+source="
+    https://openresty.org/download/$pkgname-$pkgver.tar.gz
+	$pkgname.initd
+	$pkgname.confd
+	"
+builddir="$srcdir/$pkgname-$pkgver/"
+options="!tracedeps !fhs"
+
+_orprefix="/opt/$pkgname"
+_zlib_prefix="$_orprefix/zlib"
+_pcre_prefix="$_orprefix/pcre"
+_openssl_prefix="$_orprefix/openssl111"
+
+
+build() {
+    export CC="ccache gcc -fdiagnostics-color=always -g3"
+    export CFLAGS=
+    export CXXFLAGS=
+    export CPPFLAGS=
+    export LDFLAGS=
+
+    ./configure \
+        --prefix="$_orprefix" \
+        --with-cc='ccache gcc -fdiagnostics-color=always -g3' \
+        --with-cc-opt="-DNGX_LUA_ABORT_AT_PANIC -I$_zlib_prefix/include -I$_pcre_prefix/include -I$_openssl_prefix/include" \
+        --with-ld-opt="-L$_zlib_prefix/lib -L$_pcre_prefix/lib -L$_openssl_prefix/lib -Wl,-rpath,$_zlib_prefix/lib:$_pcre_prefix/lib:$_openssl_prefix/lib" \
+        --with-pcre-jit \
+        --without-http_rds_json_module \
+        --without-http_rds_csv_module \
+        --without-lua_rds_parser \
+        --with-stream \
+        --with-stream_ssl_module \
+        --with-stream_ssl_preread_module \
+        --with-http_v2_module \
+        --without-mail_pop3_module \
+        --without-mail_imap_module \
+        --without-mail_smtp_module \
+        --with-http_stub_status_module \
+        --with-http_realip_module \
+        --with-http_addition_module \
+        --with-http_auth_request_module \
+        --with-http_secure_link_module \
+        --with-http_random_index_module \
+        --with-http_gzip_static_module \
+        --with-http_sub_module \
+        --with-http_dav_module \
+        --with-http_flv_module \
+        --with-http_mp4_module \
+        --with-http_gunzip_module \
+        --with-threads \
+        --with-compat \
+        --with-luajit-xcflags='-DLUAJIT_NUMMODE=2 -DLUAJIT_ENABLE_LUA52COMPAT' \
+        -j$JOBS
+
+    make -j$JOBS
+}
+
+check() {
+	:
+}
+
+package() {
+    make install DESTDIR="$pkgdir"
+
+    rm -rf $pkgdir$_orprefix/luajit/share/man
+
+    mkdir -p "$pkgdir/usr/bin"
+    ln -sf $_orprefix/bin/resty $pkgdir/usr/bin/
+    ln -sf $_orprefix/bin/restydoc $pkgdir/usr/bin/
+    ln -sf $_orprefix/bin/opm $pkgdir/usr/bin/
+    ln -sf $_orprefix/nginx/sbin/nginx $pkgdir/usr/bin/$pkgname
+
+	install -m755 -D "$srcdir"/$pkgname.initd \
+		"$pkgdir"/etc/init.d/$pkgname
+	install -m644 -D "$srcdir"/$pkgname.confd \
+		"$pkgdir"/etc/conf.d/$pkgname
+}
+
+resty() {
+    pkgdesc="OpenResty command-line utility, resty"
+    depends="perl perl-getopt-long perl-file-temp perl-time-hires openresty=$pkgver-r$pkgrel"
+
+    mkdir -p "$subpkgdir/usr/bin"
+    mkdir -p "$subpkgdir$_orprefix/bin"
+
+    mv "$pkgdir/usr/bin/resty" "$subpkgdir/usr/bin/"
+    mv "$pkgdir$_orprefix/bin/resty" "$subpkgdir$_orprefix/bin/"
+}
+
+restydoc() {
+    pkgdesc="OpenResty documentation tool and data, restydoc"
+    depends="openresty=$pkgver-r$pkgrel perl groff"
+
+    mkdir -p "$subpkgdir/usr/bin"
+    mkdir -p "$subpkgdir$_orprefix/bin"
+
+    mv "$pkgdir"/usr/bin/restydoc "$subpkgdir/usr/bin/"
+    mv "$pkgdir$_orprefix"/bin/restydoc "$subpkgdir$_orprefix/bin/"
+    mv "$pkgdir$_orprefix"/bin/restydoc-index "$subpkgdir$_orprefix/bin/"
+    mv "$pkgdir$_orprefix"/bin/md2pod.pl "$subpkgdir$_orprefix/bin/"
+    mv "$pkgdir$_orprefix"/bin/nginx-xml2pod "$subpkgdir$_orprefix/bin/"
+
+    mv "$pkgdir$_orprefix"/pod "$subpkgdir$_orprefix/"
+    mv "$pkgdir$_orprefix"/resty.index "$subpkgdir$_orprefix/"
+}
+
+opm() {
+    pkgdesc="OpenResty Package Manager"
+    depends="openresty=$pkgver-r$pkgrel perl openresty-restydoc=$pkgver-r$pkgrel
+             openresty-resty=$pkgver-r$pkgrel perl-digest-md5 curl tar gzip
+             perl-encode perl-file-temp perl-getopt-long"
+
+    mkdir -p "$subpkgdir/usr/bin"
+    mkdir -p "$subpkgdir$_orprefix/bin"
+    mkdir -p "$subpkgdir$_orprefix/site/"
+
+    mv "$pkgdir/usr/bin/opm" "$subpkgdir/usr/bin/"
+    mv "$pkgdir$_orprefix"/bin/opm "$subpkgdir$_orprefix/bin/"
+
+    mv "$pkgdir$_orprefix"/site/manifest "$subpkgdir$_orprefix/site/"
+    mv "$pkgdir$_orprefix"/site/pod "$subpkgdir$_orprefix/site/"
+}
+
+static() {
+    if ! is_function default_static; then
+        local i= devpkg
+
+        # search for -dev package matching our prefix
+        if [ -z "$depends_static" ]; then
+            devpkg="${subpkgname%-libs-static}"
+            devpkg="${devpkg%-static}"
+            devpkg="$devpkg-dev"
+            if subpackages_has "$devpkg"; then
+                depends_static="$devpkg"
+            fi
+        fi
+
+        depends="$depends_static"
+        pkgdesc="$pkgdesc (static library)"
+
+        cd "$pkgdir" || return 0
+        local libdirs=usr/lib
+        [ -d lib/ ] && libdirs="lib/ $libdirs"
+
+        # move *.a static library
+        for i in $(find $libdir -name '*.a'); do
+            mkdir -p "$subpkgdir"/"${i%/*}"
+            mv "$i" "$subpkgdir/$i" || return 1
+        done
+        return 0
+    fi
+
+    default_static
+}
+
+sha512sums="90cdb4f61d412faa0b07a454c2496cb2c8d7e828e95f2bc1bf6f26c6b6067682b58349588a6668cf60414cdfec82282b740c67f5c0977ded526788e295310425  openresty-1.19.3.1.tar.gz
+54fec420f6ebe1224253fb30d60a07276b88fd38c56be893ab36e8ccf38a07c59769a17d34372c5b7a7fcda9f48fc8689c749e6837e475fdf5a2332384b0b68c  openresty.initd
+dc83df542980f02191745836713fa758de5e341256edf576ed1e2ff4ec48d7435b6e95273aa3cc3231da311f00a3f34c507e7a18b518264c99f1331269570316  openresty.confd"

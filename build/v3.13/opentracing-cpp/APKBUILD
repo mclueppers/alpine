@@ -1,0 +1,41 @@
+# Maintainer: Martin Dobrev <martin@dobrev.it>
+pkgname=opentracing-cpp
+pkgver=1.5.1
+_pkgname=opentracing-cpp-$pkgver
+pkgrel=100
+pkgdesc="C++ implementation of the OpenTracing API"
+url="http://opentracing.io"
+arch="all"
+license="Apache License 2.0"
+options="check" # tests are broken
+depends=""
+depends_dev=""
+makedepends="$depends_dev build-base cmake make"
+install=""
+subpackages="$pkgname-dev"
+source="$pkgname-$pkgver.tar.gz::https://github.com/opentracing/opentracing-cpp/archive/v$pkgver.tar.gz"
+_giturl="https://github.com/opentracing/opentracing-cpp.git"
+_gittag="v$pkgver"
+builddir="$srcdir/$_pkgname"
+
+build() {
+  mkdir -p $builddir/.build
+  cd $builddir/.build
+  cmake -DCMAKE_INSTALL_PREFIX="/usr" \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_CXX_FLAGS="-fPIC" \
+        -DBUILD_MOCKTRACER=OFF \
+        ..
+  make
+}
+
+check() {
+	cd $builddir/.build
+  make test
+}
+
+package() {
+	cd "$builddir/.build"
+	make -j1 AM_MAKEFLAGS= DESTDIR="$pkgdir" install
+}
+sha512sums="d8dc1faf965fd05713bf16ebee669f9b36ca20de0ce04925aad452e9258f6d7fc51b373cd64cc1a76fbfa75ee17b71c7a76da284214223a6c3e41d37c0c57340  opentracing-cpp-1.5.1.tar.gz"

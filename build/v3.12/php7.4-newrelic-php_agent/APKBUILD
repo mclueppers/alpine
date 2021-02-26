@@ -1,6 +1,6 @@
 # Maintainer: Martin Dobrev <martin@dobrev.it>
 
-pkgver=9.13.0.270
+pkgver=9.14.0.290
 # Package release number is started at 100 so it overwrites the official package
 pkgrel=100
 _phpver=7.4
@@ -44,3 +44,4 @@ package() {
   install -d "$pkgdir"/etc/php/$_phpver/conf.d
   cp /etc/php/$_phpver/conf.d/newrelic.ini "$pkgdir/etc/php/$_phpver/conf.d/"
 }
+sha512sums="cadbd1e0e04c0f1f1d2b5df28e6f7e9ecc54383f9e3457c3a76125b243de09a83bb88b0f9f2635a5a90312620a12abb62ccef0b9d6733191941816540bb71ecf  newrelic-php5-9.14.0.290-linux-musl.tar.gz"

@@ -1,0 +1,32 @@
+# Maintainer: Martin Dobrev <martin@dobrev.it>
+
+pkgver=12
+pkgrel=100
+pkgname=clair-scanner
+pkgdesc="Run Clair scanner locally and scan Docker images for known vulnerabilities"
+url="https://github.com/arminc/$pkgname"
+arch="x86_64 aarch64"
+license="Apache License 2.0"
+depends=""
+makedepends="go"
+source="$pkgname-v$pkgver.tar.gz::https://github.com/arminc/$pkgname/archive/v$pkgver.tar.gz"
+options="!check"
+
+build () {
+  export GOPATH="$HOME/go:$srcdir"
+  export PATH="$HOME/go/bin:$PATH"
+  mkdir $srcdir/src
+  if [ -d "$srcdir/$pkgname-$pkgver" ]; then
+    mv $srcdir/$pkgname-$pkgver $srcdir/src/
+  fi
+  cd $srcdir/src/$pkgname-$pkgver
+  make install
+  dep ensure
+  CGO_ENABLED=0 go build
+}
+
+package() {
+  install -m 0755 -D $srcdir/src/$pkgname-$pkgver/$pkgname-$pkgver "$pkgdir"/usr/bin/$pkgname
+}
+
+sha512sums="aaa43a020eb945a0006e1863cd28339013245fb01faa329b7dab9857388bb7eb5e84072f2ff459af58b3f6b8e5ddfa2510011ba1881b4b7eca9ed02a2141fbc9  clair-scanner-v12.tar.gz"

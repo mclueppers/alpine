@@ -1,0 +1,209 @@
+# Contributor: Yichun Zhang <admin@openresty.com>
+# Maintainer: Yichun Zhang <admin@openresty.com>
+pkgname="openwaf"
+pkgver="1.0.0"
+_pkgver=${pkgver}_beta
+_orversion="1.13.6.2"
+_libinjectionver="3.10.0"
+pkgrel=0
+pkgdesc="OpenResty, scalable web platform by extending NGINX with Lua"
+url="https://openresty.org/"
+arch="all"
+license="BSD"
+depends="openresty-openssl111>=1.1.1g-r0 openresty-pcre openresty-zlib libgcc"
+makedepends="ccache perl openresty-openssl111-dev>=1.1.1g-r0 openresty-pcre-dev openresty-zlib-dev geoip-dev swig python2 python2-dev lua-dev luajit-dev libcidr"
+install="$pkgname.pre-install $pkgname.post-install"
+subpackages="
+    $pkgname-static $pkgname-restydoc:restydoc:noarch $pkgname-dbg
+    $pkgname-resty:resty:noarch $pkgname-opm:opm:noarch
+    "
+source="
+    https://openresty.org/download/openresty-${_orversion}.tar.gz
+    OpenWAF-$_pkgver.tar.gz::https://github.com/titansec/OpenWAF/archive/v$_pkgver.tar.gz
+    libinjection-$_libinjectionver.tar.gz::https://github.com/client9/libinjection/archive/v$_libinjectionver.tar.gz
+	$pkgname.initd
+	$pkgname.confd
+    libinjection-Makefile.overwrite
+    ngx_openwaf.conf
+	"
+
+builddir="$srcdir/openresty-${_orversion}/"
+options="!tracedeps !fhs"
+
+_orprefix="/opt/openresty"
+_orsource="$srcdir/openresty-${_orversion}"
+_zlib_prefix="$_orprefix/zlib"
+_pcre_prefix="$_orprefix/pcre"
+_openssl_prefix="$_orprefix/openssl111"
+
+_owprefix="/opt/OpenWAF"
+_owsource="$srcdir/OpenWAF-$_pkgver"
+
+_libinjectionsource="$srcdir/libinjection-$_libinjectionver"
+
+build() {
+    #mv $_owsource/lib/openresty/ngx_openwaf.conf /etc \
+    #overwrite the configure file of openresty
+    mv $_owsource/lib/openresty/configure $_orsource \
+    
+    #move third-party modules to openresty
+    rm -rf $_owsource/lib/openresty/lua-libinjection-3.9.1
+    cp -RP $_owsource/lib/openresty/* $_orsource/bundle/
+    cp -RP $_libinjectionsource $_orsource/bundle/lua-libinjection-$_libinjectionver
+    cp -RP $srcdir/libinjection-Makefile.overwrite $_orsource/bundle/lua-libinjection-$_libinjectionver/Makefile
+    #cp -RP $srcdir/lua-ffi-libinjection-0.1 $_orsource/bundle/lua-resty-libinjection-0.1
+    
+    # For package phase
+    # cd $_owsource \
+    # make install
+
+    export CC="ccache gcc -fdiagnostics-color=always -g3"
+    export CFLAGS=
+    export CXXFLAGS=
+    export CPPFLAGS=
+    export LDFLAGS=
+
+    ./configure \
+        --prefix="$_owprefix" \
+        --with-cc='ccache gcc -fdiagnostics-color=always -g3' \
+        --with-cc-opt="-DNGX_LUA_ABORT_AT_PANIC -I$_zlib_prefix/include -I$_pcre_prefix/include -I$_openssl_prefix/include" \
+        --with-ld-opt="-L$_zlib_prefix/lib -L$_pcre_prefix/lib -L$_openssl_prefix/lib -Wl,-rpath,$_zlib_prefix/lib:$_pcre_prefix/lib:$_openssl_prefix/lib" \
+        --with-pcre-jit \
+        --with-http_stub_status_module \
+        --with-http_ssl_module \
+        --with-http_realip_module \
+        --with-http_sub_module \
+        --with-http_geoip_module \
+        --with-luajit-xcflags='-DLUAJIT_NUMMODE=2 -DLUAJIT_ENABLE_LUA52COMPAT' \
+        -j1
+
+    make DESTDIR="$pkgdir"
+
+    cd $srcdir/OpenWAF-$_pkgver
+    make -j1
+}
+
+check() {
+	:
+}
+
+package() {
+    make install DESTDIR="$pkgdir"
+
+    rm -rf $pkgdir$_orprefix/luajit/share/man
+
+    mkdir -p "$pkgdir/usr/bin"
+    mkdir -p "$pkgdir$_owprefix/lib"
+    ln -sf $_owprefix/bin/resty $pkgdir/usr/bin/
+    ln -sf $_owprefix/bin/restydoc $pkgdir/usr/bin/
+    ln -sf $_owprefix/bin/opm $pkgdir/usr/bin/
+    ln -sf $_owprefix/nginx/sbin/nginx $pkgdir/usr/bin/$pkgname
+
+	install -m755 -D "$srcdir"/$pkgname.initd \
+		"$pkgdir"/etc/init.d/$pkgname
+	install -m644 -D "$srcdir"/$pkgname.confd \
+		"$pkgdir"/etc/conf.d/$pkgname
+    
+    install -m644 -D $srcdir/ngx_openwaf.conf \
+		"$pkgdir"/etc/openwaf/openwaf.conf
+
+    cp -RP $srcdir/OpenWAF-$_pkgver/conf \
+        "$pkgdir$_owprefix"/conf
+    
+    cp -RP $srcdir/OpenWAF-$_pkgver/app \
+        "$pkgdir$_owprefix"/app
+
+    cp -RP $srcdir/OpenWAF-$_pkgver/lib/twaf \
+        "$pkgdir$_owprefix"/lib/twaf
+    
+    cp -RP $srcdir/OpenWAF-$_pkgver/lib/resty/logger \
+        "$pkgdir$_owprefix"/lualib/resty
+
+    install -m755 -D $srcdir/OpenWAF-$_pkgver/lib/openresty/transforms/transforms.so \
+        "$pkgdir$_owprefix"/lualib/transforms.so
+}
+
+resty() {
+    pkgdesc="OpenResty command-line utility, resty"
+    depends="perl perl-getopt-long perl-file-temp perl-time-hires openwaf=$pkgver-r$pkgrel"
+
+    mkdir -p "$subpkgdir/usr/bin"
+    mkdir -p "$subpkgdir$_owprefix/bin"
+
+    mv "$pkgdir/usr/bin/resty" "$subpkgdir/usr/bin/"
+    mv "$pkgdir$_owprefix/bin/resty" "$subpkgdir$_owprefix/bin/"
+}
+
+restydoc() {
+    pkgdesc="OpenResty documentation tool and data, restydoc"
+    depends="openwaf=$pkgver-r$pkgrel perl groff"
+
+    mkdir -p "$subpkgdir/usr/bin"
+    mkdir -p "$subpkgdir$_owprefix/bin"
+
+    #mv "$pkgdir"/usr/bin/restydoc "$subpkgdir/usr/bin/"
+    mv "$pkgdir$_owprefix"/bin/restydoc "$subpkgdir$_owprefix/bin/"
+    mv "$pkgdir$_owprefix"/bin/restydoc-index "$subpkgdir$_owprefix/bin/"
+    mv "$pkgdir$_owprefix"/bin/md2pod.pl "$subpkgdir$_owprefix/bin/"
+    mv "$pkgdir$_owprefix"/bin/nginx-xml2pod "$subpkgdir$_owprefix/bin/"
+
+    mv "$pkgdir$_owprefix"/pod "$subpkgdir$_owprefix/"
+    mv "$pkgdir$_owprefix"/resty.index "$subpkgdir$_owprefix/"
+}
+
+opm() {
+    pkgdesc="OpenResty Package Manager"
+    depends="openwaf=$pkgver-r$pkgrel perl openwaf-restydoc=$pkgver-r$pkgrel
+             openwaf-resty=$pkgver-r$pkgrel perl-digest-md5 curl tar gzip
+             perl-encode perl-file-temp perl-getopt-long"
+
+    mkdir -p "$subpkgdir/usr/bin"
+    mkdir -p "$subpkgdir$_owprefix/bin"
+    mkdir -p "$subpkgdir$_owprefix/site/"
+
+    #mv "$pkgdir/usr/bin/opm" "$subpkgdir/usr/bin/"
+    mv "$pkgdir$_owprefix"/bin/opm "$subpkgdir$_owprefix/bin/"
+
+    mv "$pkgdir$_owprefix"/site/manifest "$subpkgdir$_owprefix/site/"
+    mv "$pkgdir$_owprefix"/site/pod "$subpkgdir$_owprefix/site/"
+}
+
+static() {
+    if ! is_function default_static; then
+        local i= devpkg
+
+        # search for -dev package matching our prefix
+        if [ -z "$depends_static" ]; then
+            devpkg="${subpkgname%-libs-static}"
+            devpkg="${devpkg%-static}"
+            devpkg="$devpkg-dev"
+            if subpackages_has "$devpkg"; then
+                depends_static="$devpkg"
+            fi
+        fi
+
+        depends="$depends_static"
+        pkgdesc="$pkgdesc (static library)"
+
+        cd "$pkgdir" || return 0
+        local libdirs=usr/lib
+        [ -d lib/ ] && libdirs="lib/ $libdirs"
+
+        # move *.a static library
+        for i in $(find $libdir -name '*.a'); do
+            mkdir -p "$subpkgdir"/"${i%/*}"
+            mv "$i" "$subpkgdir/$i" || return 1
+        done
+        return 0
+    fi
+
+    default_static
+}
+
+sha512sums="c0584566c06e95b12c5827f7b3185e859cb79a8d4754257246644c19888bfabfcec3577953b1a5a9aa7c0c5627b3e45bd0befacea4e3c64d21f895869ee302d5  openresty-1.13.6.2.tar.gz
+f55e9863ad94661a4b45277816d04b3ed8b0ef5b4cbc42fe163ec06eeaf8211ca746cead551768551556a44ec9f2a3a59f807119c7653ac67a64501d0a4042fd  OpenWAF-1.0.0_beta.tar.gz
+15d144439d99dafd04703c7d6db329120bc24abb5d954d9006d1c5aba6acd79cde1e1af3faad6f263782c042d458c567ce12d4c4c6e44baf1d0a44c94d6564ee  libinjection-3.10.0.tar.gz
+54fec420f6ebe1224253fb30d60a07276b88fd38c56be893ab36e8ccf38a07c59769a17d34372c5b7a7fcda9f48fc8689c749e6837e475fdf5a2332384b0b68c  openwaf.initd
+dc83df542980f02191745836713fa758de5e341256edf576ed1e2ff4ec48d7435b6e95273aa3cc3231da311f00a3f34c507e7a18b518264c99f1331269570316  openwaf.confd
+ebceeed8ecf0a6ad9c4203ed9358f896ebaea4901bc89ce41733479f2fe019dcf3a22f281d89fc5e674b61362ae9dd7df45c5274e481b07fc6ef3ef02d2c37a9  libinjection-Makefile.overwrite
+e6590c8bef43567a0e12902fd94edd3d2721e527e524a6e1209126d344ae7e8d7b012b2d17234269c0b46b8f10a78df681b64d2b7744477f2769d9099696868c  ngx_openwaf.conf"

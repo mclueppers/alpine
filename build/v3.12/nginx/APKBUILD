@@ -8,10 +8,10 @@
 #     - CVE-2017-7529
 #
 pkgname=nginx
-pkgver=1.19.3
+pkgver=1.19.6
 pkgrel=100
 # Revision of nginx-tests to use for check().
-_tests_hgrev=376cbc2c2b20
+_tests_hgrev=cd35d4f44937
 pkgdesc="HTTP and reverse proxy server (stable version)"
 url="http://www.nginx.org/en"
 arch="all"
@@ -88,6 +88,12 @@ _add_module "http-echo" "v0.62" "https://github.com/openresty/echo-nginx-module"
 
 _add_module "http-fancyindex" "v0.4.4" "https://github.com/aperezdc/ngx-fancyindex"
 
+_add_module "http-naxsi" "1.3" "https://github.com/nbs-system/naxsi" "naxsi_src"
+
+_add_module "http_encrypted_session" "v0.08" "https://github.com/openresty/encrypted-session-nginx-module"
+
+_add_module "stream_lua" "v0.0.9" "https://github.com/openresty/stream-lua-nginx-module"
+
 _add_module "http-modsecurity" "v1.0.1" "https://github.com/SpiderLabs/ModSecurity-nginx"
 _http_modsecurity_so="ngx_http_modsecurity_module.so"
 _http_modsecurity_depends="libmodsecurity"
@@ -96,7 +102,7 @@ _http_modsecurity_provides="modsecurity"
 _add_module "http-headers-more" "v0.33" "https://github.com/openresty/headers-more-nginx-module"
 _http_headers_more_so="ngx_http_headers_more_filter_module.so"
 
-_add_module "http-lua" "v0.10.17" "https://github.com/openresty/lua-nginx-module"
+_add_module "http-lua" "v0.10.19" "https://github.com/openresty/lua-nginx-module"
 _http_lua_depends="$pkgname-mod-devel-kit"
 _http_lua_provides="$pkgname-lua"  # for backward compatibility
 
@@ -120,7 +126,6 @@ _add_module "http-upstream-fair" "0.1.3" "https://github.com/itoffshore/nginx-up
 
 _add_module "rtmp" "v1.2.1" "https://github.com/arut/nginx-rtmp-module"
 _rtmp_provides="$pkgname-rtmp"  # for backward compatibility
-
 
 prepare() {
 	local file; for file in $source; do
@@ -281,8 +286,8 @@ _module() {
 	mkdir -p "$subpkgdir"/etc/nginx/modules
 	echo "load_module \"modules/$soname\";" > ./etc/nginx/modules/$name.conf
 }
-sha512sums="337fbbb562d1577a2a219bd132c82098a06a49f1ce40ced905fdf255238c4f70dd1f889ec8ae971a4fe5e753f98a356cadc9c766bc089f817d711b12143efcc8  nginx-1.19.3.tar.gz
-1db1138ab736e661726ed5a222a0f9de0c83a8fc389131d92622335b19390a117abd0a468f0681012cd116c589d0e3aca5907ca99be072779c739113d4903588  nginx-tests-376cbc2c2b20.tar.gz
+sha512sums="1249c56b124a8de71f5d722e53d599f3b0cb14dc0f95b1eb905a6a8019b2d33f8e76874de2a88d49c4c82ee4fa7aabd42e5044a0a110892c23b50f71cb632148  nginx-1.19.6.tar.gz
+d63cfd8c2a3a66a332d7e4c3825d2f9bd1dcc0a63730f04308bb74d91b380082f1c48cbfd6010ad0a8887c33360a72aa7a586607d67059fa6323a575f5a14f5c  nginx-tests-cd35d4f44937.tar.gz
 ac7e3153ab698b4cde077f0d5d7ac0a58897927eb36cf3b58cb01268ca0296f1d589c0a5b4f889b96b5b4a57bef05b17c59be59a9d7c4d7a3d3be58f101f7f41  nginx.conf
 0907f69dc2d3dc1bad3a04fb6673f741f1a8be964e22b306ef9ae2f8e736e1f5733a8884bfe54f3553fff5132a0e5336716250f54272c3fec2177d6ba16986f3  default.conf
 09b110693e3f4377349ccea3c43cb8199c8579ee351eae34283299be99fdf764b0c1bddd552e13e4d671b194501618b29c822e1ad53b34101a73a63954363dbb  nginx.logrotate
@@ -292,9 +297,12 @@ eb183860cd511361346e4079c1fcf470985e1c3b2a034a57f8b2a92ba851fed99256261f9b779770
 3ad37b4a251fb85a9a384f87fea5ca640166e3d7173c6ed9a857b191ae5f2e93819483b5d423fcafe8a10239b571677b342cc2d2d5d62315816f1316d7d5bb76  ngx_cache_purge-2.5.1.tar.gz
 240896b1c559a71ca6ca87136d8535edd25b1d65ebb80d46080ad41c09ed1cec9737828f9efe260782294d660cea66cf402f4e75bba3fed26f3a94de0ae2f89b  echo-nginx-module-0.62.tar.gz
 bf8ebb188c10fee5e6ebcb338fe20fdf859bb88d9b2b0e3da6f3e2f1847738d30760d2642d0dfe257092bdf2399b561631556a3a8e2fb33dc9cd0c59d371c173  ngx-fancyindex-0.4.4.tar.gz
+d7aac69b5eceeb1b0db4741201159ade1e0e7f6f7c3e8c4afa2f8959c6c00c3b5285d5185747c2fb0b1400efda02e96799836315e7e492bb4a059b14acb2142d  naxsi-1.3.tar.gz
+80651951edd69d202e991a66f531bbe0398b4f062e822bb7748411f5f597eb1d5827102ba477bb6cd2793274adf6f6d60dd89fde7645174b091143251197af69  encrypted-session-nginx-module-0.08.tar.gz
+82cd43956feaded415881a21f186edd0bdcf416cb7148d0cabe2567aee27479b0db24bbdcc7d3f5a16d7d1b6c5cf2aeb9fca25145bd2df1c900655fa967569db  stream-lua-nginx-module-0.0.9.tar.gz
 a0cadc1d45fe4ba75ff281ace7384dae2059f0046144998d8c0991e09da7ef67c5da4d0bb9d9fe1687a6751f60ed54d00daeacf821ae3aae7ebab66d7f8b3237  ModSecurity-nginx-1.0.1.tar.gz
 13165b1b8d4be281b8bd2404fa48d456013d560bace094c81da08a35dc6a4f025a809a3ae3a42be6bbf67abbcbe41e0730aba06f905220f3baeb01e1192a7d37  headers-more-nginx-module-0.33.tar.gz
-0d14cb92572b215238dd83d60bb4789b77f0bf6b9452fc8b8473bcc652342280ed32d783eb619665fd7f22f6cf6efea9b95f6f6d6a4613553a02b74b95f88d8a  lua-nginx-module-0.10.17.tar.gz
+6b258bdcb45f99f9cec3df14fa6747704ab1f0005f8a2ccd4440f8ec477e3dcbf6026e1acffc9d5fecb79605248168a77bd2a26d67c98c7d5cc336f9474ef68c  lua-nginx-module-0.10.19.tar.gz
 72887c4490854b099cb26bb3f840073a36b0d812bde4486f04dc1be182ca74f0d1e3fd709e77c240c2dcf37665f74cf04e188ea9efe8e127c6789b27b487d0cd  lua-upstream-nginx-module-0.07.tar.gz
 d8b0e79c2b9cf4dd0b3ba8bfeeca86795b1206ec2a468829e6fd20c2286c9a8f75ad135424590cfb3a9d9cded5cefde4f19ba9e36d63a0ff95487d7139732bd9  nchan-1.2.7.tar.gz
 1730845ea2e52be8c2f6cfceb2894304c5a07959a96940bb1617ee0e7cf81d22283304f411d9a219ddb71e4d9a66012bba0f6f5574d101aeb3c406f26c5d6a4e  nginx-http-shibboleth-2.0.1.tar.gz

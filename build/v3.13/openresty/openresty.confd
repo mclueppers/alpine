@@ -1,0 +1,4 @@
+# Configuration for /etc/init.d/openresty
+
+cfgfile=/opt/openresty/nginx/conf/nginx.conf
+app_prefix=/opt/openresty/nginx

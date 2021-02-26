@@ -1,0 +1,38 @@
+# Maintainer: Martin Dobrev <martin@dobrev.eu>
+
+pkgver=9.5.2
+pkgrel=0
+_phpver=8
+_php=php$_phpver
+pkgname=$_php-phpunit
+pkgdesc="PHPUnit meta package with PHP $_phpver dependencies"
+url="https://phpunit.de/"
+arch="noarch"
+license="BSD 3 Clause"
+depends="$_php $_php-phar $_php-json $_php-mbstring $_php-openssl $_php-dom $_php-xml"
+makedepends="$_php $_php-phar $_php-json $_php-mbstring $_php-openssl $_php-dom $_php-xml"
+install="$_php-phpunit.post-install"
+install_if="$_php $_php-phar $_php-common"
+
+
+prepare() {
+  default_prepare
+  mkdir -p "$builddir"
+}
+
+build() {
+  # Meta package
+  cd "$builddir"
+  wget -O phpunit$_phpver https://phar.phpunit.de/phpunit-$pkgver.phar
+  chmod +x phpunit$_phpver
+}
+
+check () {
+	cd "$builddir"
+	php8 ./phpunit$_phpver --version
+}
+
+package() {
+  mkdir -p "$pkgdir/usr/sbin/"
+  cp "$builddir/phpunit$_phpver" "$pkgdir/usr/sbin/"
+}

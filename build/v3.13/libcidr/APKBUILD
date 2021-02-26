@@ -1,0 +1,26 @@
+# Contributor: Martin Dobrev <martin@dobrev.it>
+# Maintainer: Martin Dobrev <martin@dobrev.it>
+pkgname="libcidr"
+pkgver="1.2.3"
+pkgrel=0
+pkgdesc="OpenResty, scalable web platform by extending NGINX with Lua"
+url="https://openresty.org/"
+arch="all"
+license="BSD"
+depends="openresty-openssl111>=1.1.1g-r0 openresty-pcre openresty-zlib libgcc"
+makedepends="ccache coreutils perl openresty-openssl111-dev>=1.1.1g-r0 openresty-pcre-dev openresty-zlib-dev geoip-dev swig python2 python2-dev lua-dev luajit-dev"
+install=""
+source="https://www.over-yonder.net/~fullermd/projects/$pkgname/$pkgname-$pkgver.tar.xz"
+
+builddir="$srcdir/$pkgname-$pkgver"
+options="!tracedeps !fhs"
+
+build() {
+    make PREFIX="/usr"
+}
+
+package() {
+    make install PREFIX=/usr DESTDIR="$pkgdir"
+}
+
+sha512sums="802b9fa6789f1f53fa46f94e4d66bf1d1aeb78cdb1696621d3df61d24ccbc2b3a4957a3b9cd3184615a4825332ae067630d2826193090a8ef6090720f2f0c2f5  libcidr-1.2.3.tar.xz"

@@ -1,0 +1,237 @@
+# Contributor: Yichun Zhang <admin@openresty.com>
+# Maintainer: Yichun Zhang <admin@openresty.com>
+pkgname="openwaf"
+pkgver="1.0.0"
+_pkgver=${pkgver}_beta
+_orversion="1.19.3.1"
+_libinjectionver="3.10.0"
+pkgrel=0
+pkgdesc="OpenResty, scalable web platform by extending NGINX with Lua"
+url="https://openresty.org/"
+arch="all"
+license="BSD"
+depends="openresty-openssl111>=1.1.1g-r0 openresty-pcre openresty-zlib libgcc geoip libcidr"
+makedepends="ccache perl openresty-openssl111-dev>=1.1.1g-r0 openresty-pcre-dev openresty-zlib-dev geoip-dev swig python2 python2-dev lua-dev luajit-dev libcidr"
+install="$pkgname.pre-install $pkgname.post-install"
+subpackages="
+    $pkgname-static $pkgname-restydoc:restydoc:noarch $pkgname-dbg
+    $pkgname-resty:resty:noarch $pkgname-opm:opm:noarch
+    "
+source="
+    https://openresty.org/download/openresty-${_orversion}.tar.gz
+    OpenWAF-$_pkgver.tar.gz::https://github.com/titansec/OpenWAF/archive/v$_pkgver.tar.gz
+    libinjection-$_libinjectionver.tar.gz::https://github.com/client9/libinjection/archive/v$_libinjectionver.tar.gz
+    lua-libcidr-ffi-1.0.0.opm.tar.gz::https://opm.openresty.org/api/pkg/tarball/GUI/lua-libcidr-ffi-1.0.0.opm.tar.gz
+	$pkgname.initd
+	$pkgname.confd
+    libinjection-Makefile.overwrite
+    ngx_openwaf.conf
+    openresty-$_orversion-configure.patch
+	"
+
+builddir="$srcdir/openresty-${_orversion}/"
+options="!tracedeps !fhs"
+_modules_dir="usr/lib/$pkgname/modules"
+
+_orprefix="/opt/openresty"
+_orsource="$srcdir/openresty-${_orversion}"
+_zlib_prefix="$_orprefix/zlib"
+_pcre_prefix="$_orprefix/pcre"
+_openssl_prefix="$_orprefix/openssl111"
+
+_owprefix="/opt/OpenWAF"
+_owsource="$srcdir/OpenWAF-$_pkgver"
+
+_libinjectionsource="$srcdir/libinjection-$_libinjectionver"
+
+prepare () {
+    cd $builddir
+    patch -p 1 -i "$srcdir/openresty-$_orversion-configure.patch"
+
+    # Remove bundled lua-libinjection because it fails to build
+    rm -rf $_owsource/lib/openresty/lua-libinjection-3.9.1
+    cp -RP $_owsource/lib/openresty/* $_orsource/bundle/
+    # Use the upstream version of lua-libinjection
+    cp -RP $_libinjectionsource $_orsource/bundle/lua-libinjection-$_libinjectionver
+    cp -RP $srcdir/libinjection-Makefile.overwrite $_orsource/bundle/lua-libinjection-$_libinjectionver/Makefile
+}
+
+build() {
+    #cp -RP $srcdir/lua-ffi-libinjection-0.1 $_orsource/bundle/lua-resty-libinjection-0.1
+    
+    # For package phase
+    # cd $_owsource \
+    # make install
+
+    export CC="ccache gcc -fdiagnostics-color=always -g3"
+    export CFLAGS=
+    export CXXFLAGS=
+    export CPPFLAGS=
+    export LDFLAGS=
+
+    ./configure \
+        --prefix="$_owprefix" \
+        --with-cc='ccache gcc -fdiagnostics-color=always -g3' \
+        --with-cc-opt="-DNGX_LUA_ABORT_AT_PANIC -I$_zlib_prefix/include -I$_pcre_prefix/include -I$_openssl_prefix/include" \
+        --with-ld-opt="-L$_zlib_prefix/lib -L$_pcre_prefix/lib -L$_openssl_prefix/lib -Wl,-rpath,$_zlib_prefix/lib:$_pcre_prefix/lib:$_openssl_prefix/lib" \
+        --sbin-path=/usr/sbin/$pkgname \
+		--modules-path=/$_modules_dir \
+		--conf-path=/etc/$pkgname/$pkgname.conf \
+		--pid-path=/run/$pkgname/$pkgname.pid \
+		--lock-path=/run/$pkgname/$pkgname.lock \
+        --http-client-body-temp-path=/var/tmp/$pkgname/client_body \
+		--http-proxy-temp-path=/var/tmp/$pkgname/proxy \
+		--http-fastcgi-temp-path=/var/tmp/$pkgname/fastcgi \
+		--http-uwsgi-temp-path=/var/tmp/$pkgname/uwsgi \
+		--http-scgi-temp-path=/var/tmp/$pkgname/scgi \
+        --with-pcre-jit \
+        --with-http_stub_status_module \
+        --with-http_ssl_module \
+        --with-http_realip_module \
+        --with-http_sub_module \
+        --with-http_geoip_module \
+        --with-luajit-xcflags='-DLUAJIT_NUMMODE=2 -DLUAJIT_ENABLE_LUA52COMPAT' \
+        -j1
+
+    make DESTDIR="$pkgdir"
+
+    cd $srcdir/OpenWAF-$_pkgver
+    make -j1
+}
+
+check() {
+	:
+}
+
+package() {
+    make install DESTDIR="$pkgdir"
+
+    rm -rf $pkgdir$_owprefix/luajit/share/man
+
+    mkdir -p "$pkgdir/usr/bin"
+    mkdir -p "$pkgdir$_owprefix/lib"
+    mkdir -p "$pkgdir/var/log/$pkgname"
+    mkdir -p "$pkgdir/var/tmp/$pkgname"
+
+    ln -sf $_owprefix/bin/resty $pkgdir/usr/bin/
+    ln -sf $_owprefix/bin/restydoc $pkgdir/usr/bin/
+    ln -sf $_owprefix/bin/opm $pkgdir/usr/bin/
+
+	install -m755 -D "$srcdir"/$pkgname.initd \
+		"$pkgdir"/etc/init.d/$pkgname
+	install -m644 -D "$srcdir"/$pkgname.confd \
+		"$pkgdir"/etc/conf.d/$pkgname
+    
+    install -m644 -D $srcdir/ngx_openwaf.conf \
+		"$pkgdir"/etc/openwaf/openwaf.conf
+
+    cp -RP $srcdir/OpenWAF-$_pkgver/conf \
+        "$pkgdir$_owprefix"/conf
+    sed -i -e 's/openwaf_access/openwaf\/access/g' \
+        -e 's/openwaf_security/openwaf\/error/g' \
+        $pkgdir$_owprefix/conf/twaf_default_conf.json
+    
+    cp -RP $srcdir/OpenWAF-$_pkgver/app \
+        "$pkgdir$_owprefix"/app
+
+    cp -RP $srcdir/OpenWAF-$_pkgver/lib/twaf \
+        "$pkgdir$_owprefix"/lib/twaf
+    rm -rf "$pkgdir$_owprefix"/lib/twaf/inc/cidr.lua
+    install -m644 $srcdir/lua-libcidr-ffi-1.0.0.opm/lib/libcidr-ffi.lua \
+        "$pkgdir$_owprefix"/lualib/
+    sed -i 's/lib.twaf.inc.cidr/libcidr-ffi/g' $pkgdir$_owprefix/lib/twaf/twaf_access_rule.lua
+    sed -i 's/lib.twaf.inc.cidr/libcidr-ffi/g' $pkgdir$_owprefix/lib/twaf/inc/operators.lua
+    
+    cp -RP $srcdir/OpenWAF-$_pkgver/lib/resty/logger \
+        "$pkgdir$_owprefix"/lualib/resty
+
+    install -m755 -D $srcdir/OpenWAF-$_pkgver/lib/openresty/transforms/transforms.so \
+        "$pkgdir$_owprefix"/lualib/transforms.so
+}
+
+resty() {
+    pkgdesc="OpenResty command-line utility, resty"
+    depends="perl perl-getopt-long perl-file-temp perl-time-hires openwaf=$pkgver-r$pkgrel"
+
+    mkdir -p "$subpkgdir/usr/bin"
+    mkdir -p "$subpkgdir$_owprefix/bin"
+
+    mv "$pkgdir/usr/bin/resty" "$subpkgdir/usr/bin/"
+    mv "$pkgdir$_owprefix/bin/resty" "$subpkgdir$_owprefix/bin/"
+}
+
+restydoc() {
+    pkgdesc="OpenResty documentation tool and data, restydoc"
+    depends="openwaf=$pkgver-r$pkgrel perl groff"
+
+    mkdir -p "$subpkgdir/usr/bin"
+    mkdir -p "$subpkgdir$_owprefix/bin"
+
+    #mv "$pkgdir"/usr/bin/restydoc "$subpkgdir/usr/bin/"
+    mv "$pkgdir$_owprefix"/bin/restydoc "$subpkgdir$_owprefix/bin/"
+    mv "$pkgdir$_owprefix"/bin/restydoc-index "$subpkgdir$_owprefix/bin/"
+    mv "$pkgdir$_owprefix"/bin/md2pod.pl "$subpkgdir$_owprefix/bin/"
+    mv "$pkgdir$_owprefix"/bin/nginx-xml2pod "$subpkgdir$_owprefix/bin/"
+
+    mv "$pkgdir$_owprefix"/pod "$subpkgdir$_owprefix/"
+    mv "$pkgdir$_owprefix"/resty.index "$subpkgdir$_owprefix/"
+}
+
+opm() {
+    pkgdesc="OpenResty Package Manager"
+    depends="openwaf=$pkgver-r$pkgrel perl openwaf-restydoc=$pkgver-r$pkgrel
+             openwaf-resty=$pkgver-r$pkgrel perl-digest-md5 curl tar gzip
+             perl-encode perl-file-temp perl-getopt-long"
+
+    mkdir -p "$subpkgdir/usr/bin"
+    mkdir -p "$subpkgdir$_owprefix/bin"
+    mkdir -p "$subpkgdir$_owprefix/site/"
+
+    #mv "$pkgdir/usr/bin/opm" "$subpkgdir/usr/bin/"
+    mv "$pkgdir$_owprefix"/bin/opm "$subpkgdir$_owprefix/bin/"
+
+    mv "$pkgdir$_owprefix"/site/manifest "$subpkgdir$_owprefix/site/"
+    mv "$pkgdir$_owprefix"/site/pod "$subpkgdir$_owprefix/site/"
+}
+
+static() {
+    if ! is_function default_static; then
+        local i= devpkg
+
+        # search for -dev package matching our prefix
+        if [ -z "$depends_static" ]; then
+            devpkg="${subpkgname%-libs-static}"
+            devpkg="${devpkg%-static}"
+            devpkg="$devpkg-dev"
+            if subpackages_has "$devpkg"; then
+                depends_static="$devpkg"
+            fi
+        fi
+
+        depends="$depends_static"
+        pkgdesc="$pkgdesc (static library)"
+
+        cd "$pkgdir" || return 0
+        local libdirs=usr/lib
+        [ -d lib/ ] && libdirs="lib/ $libdirs"
+
+        # move *.a static library
+        for i in $(find $libdir -name '*.a'); do
+            mkdir -p "$subpkgdir"/"${i%/*}"
+            mv "$i" "$subpkgdir/$i" || return 1
+        done
+        return 0
+    fi
+
+    default_static
+}
+
+sha512sums="90cdb4f61d412faa0b07a454c2496cb2c8d7e828e95f2bc1bf6f26c6b6067682b58349588a6668cf60414cdfec82282b740c67f5c0977ded526788e295310425  openresty-1.19.3.1.tar.gz
+f55e9863ad94661a4b45277816d04b3ed8b0ef5b4cbc42fe163ec06eeaf8211ca746cead551768551556a44ec9f2a3a59f807119c7653ac67a64501d0a4042fd  OpenWAF-1.0.0_beta.tar.gz
+15d144439d99dafd04703c7d6db329120bc24abb5d954d9006d1c5aba6acd79cde1e1af3faad6f263782c042d458c567ce12d4c4c6e44baf1d0a44c94d6564ee  libinjection-3.10.0.tar.gz
+23162bb5506025a728a888bb5db76ad125289cf7ff6cd7fcbf5191b579acb1d119c1d3c097689e1ea643635450b0a9f0d66aaad9df85560fa7c12e095c50cd21  lua-libcidr-ffi-1.0.0.opm.tar.gz
+54fec420f6ebe1224253fb30d60a07276b88fd38c56be893ab36e8ccf38a07c59769a17d34372c5b7a7fcda9f48fc8689c749e6837e475fdf5a2332384b0b68c  openwaf.initd
+dc83df542980f02191745836713fa758de5e341256edf576ed1e2ff4ec48d7435b6e95273aa3cc3231da311f00a3f34c507e7a18b518264c99f1331269570316  openwaf.confd
+ebceeed8ecf0a6ad9c4203ed9358f896ebaea4901bc89ce41733479f2fe019dcf3a22f281d89fc5e674b61362ae9dd7df45c5274e481b07fc6ef3ef02d2c37a9  libinjection-Makefile.overwrite
+d71294c5354726891ffae802a9014f5888d58bad48f4176029a06bf57ceee30d719b70e2dff0e73b67631406eec15dc63a65589effd0e7c78c72db5ce17996d8  ngx_openwaf.conf
+34af5215679e712442a4a4d2d4b5b111b0761e203b85b1cb8ec5f183f158b89204ddda2826ae5a06c4f08d9f8d6311ca6c29a46c68958cfc4be030b4bb65e68b  openresty-1.19.3.1-configure.patch"

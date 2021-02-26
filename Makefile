@@ -5,7 +5,7 @@ BUILDDIR := $(or ${BUILDDIR},${BUILDDIR},`pwd`)
 .RECIPEPREFIX +=
 .DEFAULT_GOAL := help
 STEPS := build run package clean sh upload public-key private-key generate-index
-ALPINE_VERSIONS := 3.10 3.11 3.12
+ALPINE_VERSIONS := 3.12 3.13
 
 targets = $(foreach ver,$(ALPINE_VERSIONS),.build.$(ver)-$(PLATFORM_SLUG))
 
@@ -27,7 +27,12 @@ build: $(targets) ## Build necessary Docker image for building packages
   @touch .build.$(TARGET)-${PLATFORM_SLUG}
 
 run: build ## Run a command in a new Docker container; make run a=[...]
-  @docker run --platform ${PLATFORM} --rm -it -v $(BUILDDIR)/build:/build -v $(BUILDDIR)/public:/public dobrevit-abuild:v$(VER)-${PLATFORM_SLUG} $(a)
+  @docker run --platform ${PLATFORM} --rm -it \
+    -v $(BUILDDIR)/build:/build \
+    -v $(BUILDDIR)/public:/public \
+    -v $(BUILDDIR)/.cache/v$(VER)-${PLATFORM_SLUG}:/home/packager/.ccache \
+    -e CCACHE_DIR=/home/packager/.ccache \
+    dobrevit-abuild:v$(VER)-${PLATFORM_SLUG} $(a)
 
 package: ## Usage: make package [p="5.6|7.0|7.1|7.2|all|<package-name1> <package-name2> ..."]
   @test $(p)

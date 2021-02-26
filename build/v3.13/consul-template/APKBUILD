@@ -1,0 +1,32 @@
+# Maintainer: Martin Dobrev <martin@dobrev.it>
+
+pkgver=0.25.1
+pkgrel=0
+pkgname=consul-template
+pkgdesc="Template rendering, notifier, and supervisor for Hashicorp Consul and Vault data."
+url="https://www.consul.io/"
+arch="x86_64 aarch64 arm64 armhf"
+license="Mozilla Public License 2.0"
+depends=""
+makedepends="zip"
+
+_get_arch() {
+  local _arch
+  case "$CARCH" in
+    aarch64*)  _arch="arm64" ;;
+    armhf*)    _arch="armhfv6" ;;
+    x86)       _arch="386" ;;
+    x86_64)    _arch="amd64" ;;
+    *)         echo "Unable to determine architecture from (CARCH=$CARCH)" ; return 1 ;;
+  esac
+  echo $_arch
+}
+
+source="$pkgname-$pkgver.zip::https://releases.hashicorp.com/$pkgname/$pkgver/${pkgname}_${pkgver}_linux_$(_get_arch).zip"
+options="!check"
+
+package() {
+  install -m 0755 -d "$pkgdir"/etc/consul-template
+  install -m 0755 -D "$srcdir"/$pkgname "$pkgdir"/usr/bin/$pkgname
+}
+sha512sums="483b85414066b014c4607fc69dbe74230e572d5a34edbf11a28e6572e7a9251bf922ba154731c16d481b4dc38ad15aaed08db4346ffed00db44d4d0b0665a2ab  consul-template-0.25.1.zip"

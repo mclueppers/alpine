@@ -1,6 +1,6 @@
 # Maintainer: Peter Kokot <peterkokot@gmail.com>
 
-pkgver=1.0.0
+pkgver=2.0.6
 pkgrel=0
 _phpver=7.4
 _php=php$_phpver

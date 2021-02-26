@@ -1,0 +1,136 @@
+--- openresty-1.13.6.2/configure
++++ OpenWAF-1.0.0_beta/lib/openresty/configure
+@@ -66,6 +66,8 @@
+     [ndk => 'ngx_devel_kit'],
+     [http_iconv => 'iconv-nginx-module', 'disabled'],
+     [http_echo => 'echo-nginx-module'],
++    [http_waf_var => 'ngx-http-waf-variables-module'],
++    [http_lua_proxy_cache => 'lua-upstream-cache-nginx-module'],
+     [http_xss => 'xss-nginx-module'],
+     [http_coolkit => 'ngx_coolkit'],
+     [http_set_misc => 'set-misc-nginx-module'],
+@@ -183,6 +185,12 @@
+     } elsif ($opt eq '--without-lua_cjson') {
+         $resty_opts{no_lua_cjson} = 1;
+ 
++    } elsif ($opt eq '--without-lua_geoip') {
++        $resty_opts{no_lua_geoip} = 1;
++
++    } elsif ($opt eq '--without-lua_libinjection') {
++        $resty_opts{no_lua_libinjection} = 1;
++
+     } elsif ($opt eq '--without-lua_redis_parser') {
+         $resty_opts{no_lua_redis_parser} = 1;
+ 
+@@ -222,6 +230,15 @@
+     } elsif ($opt eq '--without-lua_resty_upstream_healthcheck') {
+         $resty_opts{no_lua_resty_upstream_healthcheck} = 1;
+ 
++    } elsif ($opt eq '--without-lua_resty_logger_socket') {
++        $resty_opts{no_lua_resty_logger_socket} = 1;
++
++    } elsif ($opt eq '--without-lua_resty_iputils') {
++        $resty_opts{no_lua_resty_iputils} = 1;
++
++    } elsif ($opt eq '--without-lua_resty_libinjection') {
++        $resty_opts{no_lua_resty_libinjection} = 1;
++
+     } elsif ($opt eq '--without-lua_rds_parser') {
+         $resty_opts{no_lua_rds_parser} = 1;
+ 
+@@ -947,6 +964,66 @@
+                 "\$(MAKE) install$extra_opts";
+         }
+ 
++        unless ($opts->{no_lua_geoip}) {
++            my $dir = auto_complete 'lua-geoip';
++            if (!defined $dir) {
++                die "No lua-geoip found";
++            }
++
++            my $lua_inc;
++            if ($opts->{luajit} || $opts->{luajit_path}) {
++                $lua_inc = $ENV{LUAJIT_INC};
++
++            } else {
++                $lua_inc = $ENV{LUA_INC};
++            }
++
++            my $extra_opts = " DESTDIR=\$(DESTDIR) LUA_INCLUDE_DIR=$lua_inc " .
++                "LUA_LIB_DIR=$lualib_prefix";
++
++            if (defined $cc) {
++                $extra_opts .= " CC='$cc'";
++            } else {
++                $extra_opts .= " CC=cc";
++            }
++
++            push @make_cmds, "cd $root_dir/build/$dir && ".
++                "\$(MAKE)$extra_opts";
++
++            push @make_install_cmds, "cd $root_dir/build/$dir && " .
++                "\$(MAKE) install$extra_opts";
++        }
++
++        unless ($opts->{no_lua_libinjection}) {
++            my $dir = auto_complete 'lua-libinjection';
++            if (!defined $dir) {
++                die "No lua-libinjection found";
++            }
++
++            my $lua_inc;
++            if ($opts->{luajit} || $opts->{luajit_path}) {
++                $lua_inc = $ENV{LUAJIT_INC};
++
++            } else {
++                $lua_inc = $ENV{LUA_INC};
++            }
++
++            my $extra_opts = " DESTDIR=\$(DESTDIR) LUA_INCLUDE_DIR=$lua_inc " .
++                "LUA_LIB_DIR=$lualib_prefix";
++
++            if (defined $cc) {
++                $extra_opts .= " CC='$cc'";
++            } else {
++                $extra_opts .= " CC=cc";
++            }
++
++            push @make_cmds, "cd $root_dir/build/$dir && ".
++                "\$(MAKE)$extra_opts";
++
++            push @make_install_cmds, "cd $root_dir/build/$dir && " .
++                "\$(MAKE) install$extra_opts";
++        }
++
+         unless ($opts->{no_lua_redis_parser}) {
+             my $dir = auto_complete 'lua-redis-parser';
+             if (!defined $dir) {
+@@ -1051,7 +1128,8 @@
+         }
+ 
+         for my $key (qw(dns memcached redis mysql string upload websocket
+-                        lock lrucache core upstream_healthcheck limit_traffic))
++                        lock lrucache core upstream_healthcheck limit_traffic 
++                        logger_socket iputils libinjection))
+         {
+             unless ($opts->{"no_lua_resty_$key"}) {
+                 (my $key2 = $key) =~ s/_/-/g;
+@@ -1235,6 +1313,8 @@
+     $msg .= <<'_EOC_';
+ 
+   --without-lua_cjson                disable the lua-cjson library
++  --without-lua_geoip                disable the lua-geoip library
++  --without-lua_libinjection         disable the lua-libinjection library
+   --without-lua_redis_parser         disable the lua-redis-parser library
+   --without-lua_rds_parser           disable the lua-rds-parser library
+   --without-lua_resty_dns            disable the lua-resty-dns library
+@@ -1244,6 +1324,9 @@
+   --without-lua_resty_upload         disable the lua-resty-upload library
+   --without-lua_resty_upstream_healthcheck
+                                      disable the lua-resty-upstream-healthcheck library
++  --without-lua_resty_logger_socket  disable the lua-resty-logger-socket library
++  --without-lua_resty_iputils        disable the lua-resty-iputils library
++  --without-lua_resty_libinjection   disable the lua-resty-libinjection library
+   --without-lua_resty_string         disable the lua-resty-string library
+   --without-lua_resty_websocket      disable the lua-resty-websocket library
+   --without-lua_resty_limit_traffic  disable the lua-resty-limit-traffic library

@@ -1,0 +1,134 @@
+# Contributor: Yichun Zhang <admin@openresty.com>
+# Maintainer: Yichun Zhang <admin@openresty.com>
+pkgname="openresty-debug"
+pkgver="1.19.3.1"
+pkgrel=0
+pkgdesc="The debug version of OpenResty"
+url="https://openresty.org/"
+arch="all"
+license="BSD"
+depends="openresty-openssl111-debug>=1.1.1g-r0 openresty-pcre openresty-zlib libgcc"
+makedepends="ccache perl openresty-openssl111-debug-dev>=1.1.1g-r0 openresty-pcre-dev openresty-zlib-dev"
+install="$pkgname.pre-install $pkgname.post-install"
+subpackages="$pkgname-static $pkgname-dbg"
+source="
+    https://openresty.org/download/openresty-$pkgver.tar.gz
+	$pkgname.initd
+	$pkgname.confd
+	"
+builddir="$srcdir/openresty-$pkgver/"
+options="!tracedeps !fhs"
+
+_orprefix="/usr/local/$pkgname"
+_zlib_prefix="/usr/local/openresty/zlib"
+_pcre_prefix="/usr/local/openresty/pcre"
+_openssl_prefix="$_orprefix/openssl111"
+
+
+build() {
+    export CC="ccache gcc -fdiagnostics-color=always -g3"
+    export CFLAGS=
+    export CXXFLAGS=
+    export CPPFLAGS=
+    export LDFLAGS=
+
+    ./configure \
+        --prefix="$_orprefix" \
+        --with-cc='ccache gcc -fdiagnostics-color=always' \
+        --with-cc-opt="-DNGX_LUA_ABORT_AT_PANIC -I$_zlib_prefix/include -I$_pcre_prefix/include -I$_openssl_prefix/include -O0 -g3" \
+        --with-ld-opt="-L$_zlib_prefix/lib -L$_pcre_prefix/lib -L$_openssl_prefix/lib -Wl,-rpath,$_zlib_prefix/lib:$_pcre_prefix/lib:$_openssl_prefix/lib" \
+        --with-debug \
+        --with-pcre-jit \
+        --without-http_rds_json_module \
+        --without-http_rds_csv_module \
+        --without-lua_rds_parser \
+        --with-stream \
+        --with-stream_ssl_module \
+        --with-stream_ssl_preread_module \
+        --with-http_v2_module \
+        --without-mail_pop3_module \
+        --without-mail_imap_module \
+        --without-mail_smtp_module \
+        --with-http_stub_status_module \
+        --with-http_realip_module \
+        --with-http_addition_module \
+        --with-http_auth_request_module \
+        --with-http_secure_link_module \
+        --with-http_random_index_module \
+        --with-http_gzip_static_module \
+        --with-http_sub_module \
+        --with-http_dav_module \
+        --with-http_flv_module \
+        --with-http_mp4_module \
+        --with-http_gunzip_module \
+        --with-threads \
+        --with-compat \
+        --with-luajit-xcflags='-DLUAJIT_NUMMODE=2 -DLUAJIT_ENABLE_LUA52COMPAT -g3 -O0' \
+        -j$JOBS
+
+    make -j$JOBS
+}
+
+check() {
+	:
+}
+
+package() {
+    make install DESTDIR="$pkgdir"
+
+    rm -rf $pkgdir$_orprefix/luajit/share/man
+
+    mkdir -p "$pkgdir/usr/bin"
+
+    rm -f $pkgdir$_orprefix/bin/resty
+    rm -f $pkgdir$_orprefix/bin/restydoc
+    rm -f $pkgdir$_orprefix/bin/restydoc-index
+    rm -f $pkgdir$_orprefix/bin/md2pod.pl
+    rm -f $pkgdir$_orprefix/bin/nginx-xml2pod
+    rm -f $pkgdir$_orprefix/bin/opm
+    rm -rf $pkgdir$_orprefix/pod/*
+    rm -f $pkgdir$_orprefix/resty.index
+
+    ln -sf $_orprefix/nginx/sbin/nginx $pkgdir/usr/bin/$pkgname
+
+	install -m755 -D "$srcdir"/$pkgname.initd \
+		"$pkgdir"/etc/init.d/$pkgname
+	install -m644 -D "$srcdir"/$pkgname.confd \
+		"$pkgdir"/etc/conf.d/$pkgname
+}
+
+static() {
+    if ! is_function default_static; then
+        local i= devpkg
+
+        # search for -dev package matching our prefix
+        if [ -z "$depends_static" ]; then
+            devpkg="${subpkgname%-libs-static}"
+            devpkg="${devpkg%-static}"
+            devpkg="$devpkg-dev"
+            if subpackages_has "$devpkg"; then
+                depends_static="$devpkg"
+            fi
+        fi
+
+        depends="$depends_static"
+        pkgdesc="$pkgdesc (static library)"
+
+        cd "$pkgdir" || return 0
+        local libdirs=usr/lib
+        [ -d lib/ ] && libdirs="lib/ $libdirs"
+
+        # move *.a static library
+        for i in $(find $libdir -name '*.a'); do
+            mkdir -p "$subpkgdir"/"${i%/*}"
+            mv "$i" "$subpkgdir/$i" || return 1
+        done
+        return 0
+    fi
+
+    default_static
+}
+
+sha512sums="90cdb4f61d412faa0b07a454c2496cb2c8d7e828e95f2bc1bf6f26c6b6067682b58349588a6668cf60414cdfec82282b740c67f5c0977ded526788e295310425  openresty-1.19.3.1.tar.gz
+d173f4f02e99006fba81868cacccbaa86560ea0477149b33e8906d6ac5dc1138f7aba6daf0acbbdab14165723bc021533485e9dc34ad8d60c9f7aa48ab068e55  openresty-debug.initd
+b7a47806c5ad68946fcf2932c3c2d156298264bed92e817f2f5f74e23d16ed0fd2cba2a1a1ddfc26f3fa777dbf5029aa7307a426496dc44f0a7ec7ae94c299ab  openresty-debug.confd"

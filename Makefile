@@ -27,7 +27,7 @@ build: $(targets) ## Build necessary Docker image for building packages
   @touch .build.$(TARGET)-${PLATFORM_SLUG}
 
 run: build ## Run a command in a new Docker container; make run a=[...]
-  @docker run --platform ${PLATFORM} --rm -it \
+  @docker run --platform ${PLATFORM} --rm \
     -v $(BUILDDIR)/build:/build \
     -v $(BUILDDIR)/public:/public \
     -v $(BUILDDIR)/.cache/v$(VER)-${PLATFORM_SLUG}:/home/packager/.ccache \

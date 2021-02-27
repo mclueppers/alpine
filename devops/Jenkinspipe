@@ -1,0 +1,82 @@
+#!/usr/bin/env groovy
+
+node("arm64") {
+    stage("Obtain code") {
+        git url: "https://github.com/mclueppers/alpine.git"
+    }
+    
+    stage("printenv") {
+        sh "printenv | sort -n"
+    }
+    
+    stage ("Generate build jobs") {
+        Map alpinePackages = [:]
+        def ALPINE_VERSIONS = ["3.12", "3.13"]
+
+        ALPINE_VERSIONS.each {
+            def results = sh(
+                returnStdout: true,
+                script: "ls ./build/v${it}"
+            ).trim()
+            alpinePackages[(String) it] = results.split("\n")
+        }
+
+        jobDsl(
+            lookupStrategy: 'JENKINS_ROOT',
+            removedConfigFilesAction: 'DELETE',
+            removedJobAction: 'DELETE',
+            removedViewAction: 'DELETE',
+            scriptText: """
+                def ALPINE_PACKAGES = ${alpinePackages.inspect()}
+                def pipelineScript = readFileFromWorkspace('devops/buildPackage.groovy')
+
+                folder('Alpine') {
+                    description "Folder containing Alpine linux package build jobs"
+                }
+
+                folder('Alpine/build') {
+                    description "Folder containing the matrix for building Alpine packages"
+                }
+                
+                folder('Alpine/build/v3.12') {
+                    description "Folder containing the matrix for building Alpine packages"
+                }
+                
+                folder('Alpine/build/v3.13') {
+                    description "Folder containing the matrix for building Alpine packages"
+                }
+
+                ALPINE_PACKAGES.collect { alpineVersion, alpinePackages ->
+                    alpinePackages.collect { buildFolder ->
+                        def jobName = \"Alpine/build/v\${alpineVersion}/\${buildFolder}\"
+
+                        pipelineJob(jobName) {
+                            definition {
+                                cps {
+                                    sandbox(false)
+                                    script(pipelineScript)
+                                }
+                            }
+                            description "Build package \${buildFolder} for Alpine \${alpineVersion}."
+
+                            logRotator {
+                                daysToKeep(30)
+                                numToKeep(20)
+                            }
+
+                            parameters {
+                                stringParam('ALPINE_VERSION', \"\${alpineVersion}\", 'Alpine version')
+                                stringParam('PACKAGE_NAME', \"\${buildFolder}\", 'Package name')
+                            }
+                        }
+
+                        // If it's a new job, queue it.
+                        //if (!jenkins.model.Jenkins.instance.getItemByFullName(jobName)) {
+                        //    queue(jobName)
+                        //}
+                    }
+                }        
+            """
+        )
+    }
+}

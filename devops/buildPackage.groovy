@@ -17,3 +17,4 @@ node("arm64") {
     stage("Build") {
         sh 'make package p=$PACKAGE_NAME'
     }
+}
